@@ -28,27 +28,27 @@ CREATE TABLE menu_items (
     id SERIAL PRIMARY KEY,
     item_name TEXT NOT NULL,
     price NUMERIC(10,2) NOT NULL,
-    times_ordered INT DEFAULT 0,
+    times_ordered INT DEFAULT 0
 );
 CREATE TABLE items_in_order (
     junction_id SERIAL PRIMARY KEY,
     order_id INT REFERENCES orders(id),
-    menu_id INT REFERENCES menu_items(id),
+    menu_id INT REFERENCES menu_items(id)
 );
 CREATE TABLE suppliers (
     id SERIAL PRIMARY KEY,
     supplier_name TEXT NOT NULL,
-    supplier_name VARCHAR(15) NOT NULL,
+    phone_number VARCHAR(15) NOT NULL,
     delivery_day CHAR(3)
 );
 CREATE TABLE inventory (
     id SERIAL PRIMARY KEY,
-    supplier_id INT REFERENCES suppliers(id),
     item_name TEXT NOT NULL,
     quantity INT DEFAULT 0 CHECK (quantity >= 0),
+    supplier_id INT REFERENCES suppliers(id)
 );
 CREATE TABLE ingredients_in_item (
     junction_id SERIAL PRIMARY KEY,
     menu_id INT REFERENCES menu_items(id),
-    inventory_id INT REFERENCES inventory(id),
+    inventory_id INT REFERENCES inventory(id)
 );
