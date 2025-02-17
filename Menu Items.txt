@@ -74,4 +74,13 @@ Almond Milk Tea
     almond flavoring
     tea mix
 
+Caramel Milk Tea
+    milk
+    caramel
+    tea mix
 
+Peach Milk Tea
+    milk
+    peach flavoring
+    peaches
+    tea mix
