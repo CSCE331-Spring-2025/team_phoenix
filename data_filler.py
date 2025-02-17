@@ -28,7 +28,7 @@ def populate_orders(file_name, sales_target=750000, orders_per_day=100, min_drin
         order_id = 1  # track order ID
 
         # loop until sales target is reached AND atleast 40 weeks have passed
-        while total_sales <= sales_target and days <= 275:
+        while total_sales <= sales_target or days <= 275:
             daily_sales = 0
             
             # two peak days with roughly double the orders
@@ -55,7 +55,7 @@ def populate_orders(file_name, sales_target=750000, orders_per_day=100, min_drin
                 file.write(f"INSERT INTO orders (employee_id, total_cost, time_placed) VALUES ({random.randint(1, 6)}, {order_total}, '{timestamp}');\n")
                 
                 # populate items within the order
-                populate_order_items('testItems.sql', order_id, drinks, num_items=16)
+                populate_order_items('populateItems.sql', order_id, drinks, num_items=16)
                 
                 order_id += 1  # increment order ID
 
@@ -64,4 +64,4 @@ def populate_orders(file_name, sales_target=750000, orders_per_day=100, min_drin
     
     print(days)
 
-populate_orders('testOrders.sql', sales_target=750000, orders_per_day=100, min_drinks=1, max_drinks=6, avg_drink_price=6)
+populate_orders('populateOrders.sql', sales_target=750000, orders_per_day=100, min_drinks=1, max_drinks=6, avg_drink_price=6)
