@@ -28,7 +28,6 @@ CREATE TABLE menu_items (
     id SERIAL PRIMARY KEY,
     item_name TEXT NOT NULL,
     price NUMERIC(10,2) NOT NULL,
-    times_ordered INT DEFAULT 0
 );
 CREATE TABLE items_in_order (
     junction_id SERIAL PRIMARY KEY,
