@@ -3,41 +3,75 @@
 Green Tea Matcha
     milk
     matcha powder
-    (topping?)
+    tea mix
 
 Oreo Milk Tea
     oreos
     milk
-    tea flovar
-    (ok wtf is the shit at the bottom of those drinks??)
+    tea mix
 
 Strawberry Lemonade Smoothie
     lemonade
     frozen strawberries
     milk
+    tea mix
 
 Mango Smoothie?
     milk
     frozen mangos
+    tea mix
 
 Lychee Milk Tea
+    milk
+    lychee flavoring
+    lychees
+    tea mix
 
 Vanilla Milk Tea
+    milk
+    vanilla essence
+    tea mix
 
 Taro Milk Tea
+    milk
+    taro powder
+    tea mix
 
 Chocolate Milk Tea
+    milk
+    chocolate powder
+    tea mix
 
 Black Tea Matcha
+    milk
+    black tea
+    tea mix
 
 Coconut Milk Tea
+    milk
+    coconut flavor
+    coconut shavings
+    tea mix
 
 Coffee Milk Tea
+    milk
+    coffee
+    tea mix
 
 Honeydew Milk Tea
+    milk
+    honeydew flavor
+    honeydew
+    tea mix
 
 Brown Sugar Milk Tea
+    milk
+    brown sugar
+    tea mix
 
 Almond Milk Tea
+    milk
+    almond flavoring
+    tea mix
 
 
