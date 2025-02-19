@@ -42,10 +42,9 @@ Chocolate Milk Tea
     chocolate powder
     tea mix
 
-Black Tea Matcha
+Black Tea
     milk
     black tea
-    tea mix
 
 Coconut Milk Tea
     milk
