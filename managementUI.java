@@ -7,7 +7,12 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+// Add a section called 'Employees' with sections for First Name, Last Name, and Employee ID, do what rubric says
+
+// Change categories to Non-Perishables, Bases, Powder, Toppings
 
 public class managementUI extends Application {
     private VBox categoryContent;
@@ -38,6 +43,7 @@ public class managementUI extends Application {
         ((Button) topMenu.getChildren().get(1))
                 .setOnAction(e -> root.setCenter(createCountInventorySection("Non-Perishables")));
         ((Button) topMenu.getChildren().get(2)).setOnAction(e -> root.setCenter(createTrendsSection()));
+
     }
 
     // Function for making the navigation bar
@@ -51,10 +57,11 @@ public class managementUI extends Application {
         return topMenu;
     }
 
-    // Function for making the category menu (Cups, Milk, Syrup, Flavoring, Fruit)
+    // Function for making the category menu
     private HBox createCategoryMenu() {
         HBox categoryMenu = new HBox(10);
-        String[] categories = { "Non-Perishables", "Milk", "Syrup", "Flavoring", "Fruit" };
+        String[] categories = { "Non-Perishables", "Milk", "Syrup", "Flavoring", "Fruit", "Miscellaneous" }; // change
+                                                                                                             // later
         for (String category : categories) {
             Button button = new Button(category);
             button.setOnAction(e -> updateCategoryContent(category));
@@ -65,7 +72,7 @@ public class managementUI extends Application {
 
     // Actual items for category, placeholders for now until database is connected
     // Added all the flavoring from Menu Items.txt on out github
-    private void updateCategoryContent(String category) {
+    private void updateCategoryContent(String category) { // make categories milk,flavor, non-perishables
         categoryContent.getChildren().clear();
         switch (category) {
             case "Non-Perishables":
@@ -75,16 +82,19 @@ public class managementUI extends Application {
                         new Label("Cup Holders"), new TextField(),
                         new Label("Cups"), new TextField());
                 break;
-            case "Milk":
-                categoryContent.getChildren().addAll(new Label("Whole Milk"), new TextField(),
-                        new Label("2% Milk"), new TextField(),
-                        new Label("Nonfat Milk"), new TextField(),
-                        new Label("Soy Milk"), new TextField(),
-                        new Label("Lactose-Free Milk"), new TextField(),
-                        new Label("Almond Milk"), new TextField(),
-                        new Label("Coconut Milk"), new TextField(),
-                        new Label("Oat Milk"), new TextField());
-                break;
+            /*
+             * case "Milk":
+             * categoryContent.getChildren().addAll(new Label("Whole Milk"), new
+             * TextField(),
+             * new Label("2% Milk"), new TextField(),
+             * new Label("Nonfat Milk"), new TextField(),
+             * new Label("Soy Milk"), new TextField(),
+             * new Label("Lactose-Free Milk"), new TextField(),
+             * new Label("Almond Milk"), new TextField(),
+             * new Label("Coconut Milk"), new TextField(),
+             * new Label("Oat Milk"), new TextField());
+             * break;
+             */
             case "Syrup":
                 categoryContent.getChildren().addAll(new Label("Vanilla"), new TextField(),
                         new Label("Caramel"), new TextField(),
@@ -105,16 +115,58 @@ public class managementUI extends Application {
                         new Label("Lychee"), new TextField(),
                         new Label("Mango"), new TextField());
                 break;
-            case "Miscellaneous":
-                categoryContent.getChildren().addAll(new Label("Cocoa Powder"), new TextField(),
-                        new Label("Taro Powder"), new TextField(),
-                        new Label("Matcha Powder"), new TextField(),
-                        new Label("Lemonade Mix"), new TextField(),
-                        new Label("Brown Sugar"), new TextField(),
-                        new Label("Oreos"), new TextField(),
-                        new Label("Tea mix"), new TextField());
+            case "Miscellaneous": // add vanilla essence
+                TextField cocoaInField = new TextField();
+                TextField taroInField = new TextField();
+                TextField matchaPowderInField = new TextField();
+                TextField lemonadeMixInField = new TextField();
+                TextField brownSugarInField = new TextField();
+                TextField oreosInField = new TextField();
+                TextField teaMixInField = new TextField();
+
+                Button submitCocoa = new Button("Submit");
+                Button submitTaro = new Button("Submit");
+                Button submitMatcha = new Button("Submit");
+                Button submitLemonade = new Button("Submit");
+                Button submitBrownSugar = new Button("Submit");
+                Button submitOreos = new Button("Submit");
+                Button submitTeaMix = new Button("Submit");
+
+                categoryContent.getChildren().addAll(new Label("Cocoa Powder"), cocoaInField, submitCocoa,
+                        new Label("Taro Powder"), taroInField, submitTaro,
+                        new Label("Matcha Powder"), matchaPowderInField, submitMatcha,
+                        new Label("Lemonade Mix"), lemonadeMixInField, submitLemonade,
+                        new Label("Brown Sugar"), brownSugarInField, submitBrownSugar,
+                        new Label("Oreos"), oreosInField, submitOreos,
+                        new Label("Tea mix"), teaMixInField, submitTeaMix);
+
+                // below is variable declarations for the different inputs to be inserted into
+                // the database, commented out temporarily
+                /*
+                 * int cocoaInput = cocoaInField.getText();
+                 * int taroInput = taroInField.getText();
+                 * int matchaPowderInput = matchaPowderInField.getText();
+                 * int lemonadeMixInput = lemonadeMixInField.getText();
+                 * int brownSugarInput = brownSugarInField.getText();
+                 * int oreosInput = oreosInField.getText();
+                 * int teaMixInput = teaMixInField.getText();
+                 */
+
                 break;
         }
+        // Just testing how to take in input from the text fields
+        /*
+         * TextField inputField = new TextField();
+         * Button submitButton = new Button("Submit");
+         * 
+         * submitButton.setOnAction(e -> {
+         * String input = inputField.getText();
+         * System.out.println("Input: " + input);
+         * // Perform action with the input
+         * });
+         */
+
+        // categoryContent.getChildren().addAll(inputField, submitButton);
     }
 
     // Functions for creating the different sections of the management POS UI
