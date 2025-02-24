@@ -27,17 +27,22 @@ public class jdbcpostgreSQLGUI {
       // create a statement object
       Statement stmt = conn.createStatement();
       // create an SQL statement
-      String sqlStatement = "SELECT first_name FROM employees";
+      String sqlInsert = "INSERT INTO employees (first_name, last_name) VALUES ('Marshall', 'Davis')";
       // send statement to DBMS
+      // int rows =
+      stmt.executeUpdate(sqlInsert);
+
+      String sqlStatement = "SELECT * FROM employees";
       ResultSet result = stmt.executeQuery(sqlStatement);
 
       // OUTPUT
-      JOptionPane.showMessageDialog(null, "Employee First names from the Database.");
+      // JOptionPane.showMessageDialog(null, "Employee First names from the
+      // Database.");
 
-      // System.out.println("______________________________________");
+      // // System.out.println("______________________________________");
       while (result.next()) {
         // System.out.println(result.getString("cus_lname"));
-        cus_lname += result.getString("first_name") + "\n";
+        cus_lname += result.getString("first_name") + " " + result.getString("last_name") + "\n";
       }
     } catch (Exception e) {
       JOptionPane.showMessageDialog(null, "Error accessing Database.");
@@ -51,4 +56,5 @@ public class jdbcpostgreSQLGUI {
       JOptionPane.showMessageDialog(null, "Connection NOT Closed.");
     } // end try catch
   }// end main
-}// end Class
+}
+// end Class
