@@ -25,7 +25,7 @@ public class managementUI extends Application {
 
         // Starting screen (In this case, Delivery section for Cups)
         categoryContent = new VBox();
-        root.setCenter(createDeliverySection("Cups"));
+        root.setCenter(createDeliverySection("Non-Perishables"));
         Scene mainScene = new Scene(root, 800, 600);
 
         // Button Actions
@@ -33,8 +33,10 @@ public class managementUI extends Application {
         primaryStage.show();
 
         // Change content on screen when clicking buttons
-        ((Button) topMenu.getChildren().get(0)).setOnAction(e -> root.setCenter(createDeliverySection("Cups")));
-        ((Button) topMenu.getChildren().get(1)).setOnAction(e -> root.setCenter(createCountInventorySection("Cups")));
+        ((Button) topMenu.getChildren().get(0))
+                .setOnAction(e -> root.setCenter(createDeliverySection("Non-Perishables")));
+        ((Button) topMenu.getChildren().get(1))
+                .setOnAction(e -> root.setCenter(createCountInventorySection("Non-Perishables")));
         ((Button) topMenu.getChildren().get(2)).setOnAction(e -> root.setCenter(createTrendsSection()));
     }
 
@@ -52,7 +54,7 @@ public class managementUI extends Application {
     // Function for making the category menu (Cups, Milk, Syrup, Flavoring, Fruit)
     private HBox createCategoryMenu() {
         HBox categoryMenu = new HBox(10);
-        String[] categories = { "Cups", "Milk", "Syrup", "Flavoring", "Fruit" };
+        String[] categories = { "Non-Perishables", "Milk", "Syrup", "Flavoring", "Fruit" };
         for (String category : categories) {
             Button button = new Button(category);
             button.setOnAction(e -> updateCategoryContent(category));
@@ -66,10 +68,12 @@ public class managementUI extends Application {
     private void updateCategoryContent(String category) {
         categoryContent.getChildren().clear();
         switch (category) {
-            case "Cups":
-                categoryContent.getChildren().addAll(new Label("Large Cups"), new TextField(),
-                        new Label("Medium Cups"), new TextField(),
-                        new Label("Small Cups"), new TextField());
+            case "Non-Perishables":
+                categoryContent.getChildren().addAll(new Label("Straws"), new TextField(),
+                        new Label("Napkins"), new TextField(),
+                        new Label("Lids"), new TextField(),
+                        new Label("Cup Holders"), new TextField(),
+                        new Label("Cups"), new TextField());
                 break;
             case "Milk":
                 categoryContent.getChildren().addAll(new Label("Whole Milk"), new TextField(),
@@ -107,7 +111,7 @@ public class managementUI extends Application {
                         new Label("Matcha Powder"), new TextField(),
                         new Label("Lemonade Mix"), new TextField(),
                         new Label("Brown Sugar"), new TextField(),
-                        new Label("Oreo Crumbs"), new TextField(),
+                        new Label("Oreos"), new TextField(),
                         new Label("Tea mix"), new TextField());
                 break;
         }
