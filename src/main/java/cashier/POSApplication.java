@@ -24,11 +24,24 @@ import java.util.*;
 
 public class POSApplication extends Application {
     ArrayList<String> orderList = new ArrayList<>();
+    ArrayList<Integer> orderIDList = new ArrayList<>();
+
+    int orderNum;
 
     Database database = new Database();
 
     @Override
     public void start(Stage stage) throws IOException {
+
+        Button startOrder = new Button();
+        startOrder.setText("Start order");
+        startOrder.setPrefSize(300, 50);
+
+        // first group
+        Group firstRoot = new Group(startOrder);
+
+        Scene firstScene = new Scene(firstRoot, 1080, 720);
+
 
         Rectangle bottomBar = new Rectangle();
         bottomBar.setX(0);
@@ -42,11 +55,10 @@ public class POSApplication extends Application {
 
         // buttons
         Button button1 = new Button();
-        button1.setText(database.getItemName(13));
+        button1.setText(database.getItemName(1));
         button1.setPrefSize(150, 150);
         button1.setContentDisplay(ContentDisplay.TOP);
-
-        Image button1Image = new Image("file:images/matcha-milk-tea.jpg");
+        Image button1Image = new Image("file:images/strawberry-lemonade-smoothie.jpg");
         ImageView button1ImageView = new ImageView(button1Image);
         button1ImageView.setPreserveRatio(true);
         button1ImageView.setFitHeight(button1.getPrefHeight() - 50);
@@ -54,11 +66,11 @@ public class POSApplication extends Application {
         button1.setGraphic(button1ImageView);
 
         Button button2 = new Button();
-        button2.setText(database.getItemName(14));
+        button2.setText(database.getItemName(2));
         button2.setPrefSize(150, 150);
         button2.setContentDisplay(ContentDisplay.TOP);
 
-        Image button2Image = new Image("file:images/oreo-milk-tea.jpg");
+        Image button2Image = new Image("file:images/mango-smoothie.jpg");
         ImageView button2ImageView = new ImageView(button2Image);
         button2ImageView.setPreserveRatio(true);
         button2ImageView.setFitHeight(button2.getPrefHeight() - 50);
@@ -66,11 +78,11 @@ public class POSApplication extends Application {
         button2.setGraphic(button2ImageView);
 
         Button button3 = new Button();
-        button3.setText("Strawberry lemonade smoothie");
+        button3.setText(database.getItemName(3));
         button3.setPrefSize(150, 150);
         button3.setContentDisplay(ContentDisplay.TOP);
 
-        Image button3Image = new Image("file:images/strawberry-lemonade-smoothie.jpg");
+        Image button3Image = new Image("file:images/almond-milk-tea.jpg");
         ImageView button3ImageView = new ImageView(button3Image);
         button3ImageView.setPreserveRatio(true);
         button3ImageView.setFitHeight(button3.getPrefHeight() - 50);
@@ -78,11 +90,11 @@ public class POSApplication extends Application {
         button3.setGraphic(button3ImageView);
 
         Button button4 = new Button();
-        button4.setText("Mango smoothie");
+        button4.setText(database.getItemName(4));
         button4.setPrefSize(150, 150);
         button4.setContentDisplay(ContentDisplay.TOP);
 
-        Image button4Image = new Image("file:images/mango-smoothie.jpg");
+        Image button4Image = new Image("file:images/caramel-milk-tea.jpg");
         ImageView button4ImageView = new ImageView(button4Image);
         button4ImageView.setPreserveRatio(true);
         button4ImageView.setFitHeight(button4.getPrefHeight() - 50);
@@ -90,11 +102,11 @@ public class POSApplication extends Application {
         button4.setGraphic(button4ImageView);
 
         Button button5 = new Button();
-        button5.setText("Lychee milk tea");
+        button5.setText(database.getItemName(5));
         button5.setPrefSize(150, 150);
         button5.setContentDisplay(ContentDisplay.TOP);
 
-        Image button5Image = new Image("file:images/lychee-milk-tea.jpg");
+        Image button5Image = new Image("file:images/brown-sugar-milk-tea.jpg");
         ImageView button5ImageView = new ImageView(button5Image);
         button5ImageView.setPreserveRatio(true);
         button5ImageView.setFitHeight(button5.getPrefHeight() - 50);
@@ -102,11 +114,11 @@ public class POSApplication extends Application {
         button5.setGraphic(button5ImageView);
 
         Button button6 = new Button();
-        button6.setText("Vanilla milk tea");
+        button6.setText(database.getItemName(6));
         button6.setPrefSize(150, 150);
         button6.setContentDisplay(ContentDisplay.TOP);
 
-        Image button6Image = new Image("file:images/vanilla-milk-tea.jpg");
+        Image button6Image = new Image("file:images/lychee-milk-tea.jpg");
         ImageView button6ImageView = new ImageView(button6Image);
         button6ImageView.setPreserveRatio(true);
         button6ImageView.setFitHeight(button6.getPrefHeight() - 50);
@@ -114,11 +126,11 @@ public class POSApplication extends Application {
         button6.setGraphic(button6ImageView);
 
         Button button7 = new Button();
-        button7.setText("Taro milk tea");
+        button7.setText(database.getItemName(7));
         button7.setPrefSize(150, 150);
         button7.setContentDisplay(ContentDisplay.TOP);
 
-        Image button7Image = new Image("file:images/taro-milk-tea.jpeg");
+        Image button7Image = new Image("file:images/vanilla-milk-tea.jpg");
         ImageView button7ImageView = new ImageView(button7Image);
         button7ImageView.setPreserveRatio(true);
         button7ImageView.setFitHeight(button7.getPrefHeight() - 50);
@@ -126,11 +138,11 @@ public class POSApplication extends Application {
         button7.setGraphic(button7ImageView);
 
         Button button8 = new Button();
-        button8.setText("Chocolate milk tea");
+        button8.setText(database.getItemName(8));
         button8.setPrefSize(150, 150);
         button8.setContentDisplay(ContentDisplay.TOP);
 
-        Image button8Image = new Image("file:images/chocolate-milk-tea.jpg");
+        Image button8Image = new Image("file:images/taro-milk-tea.jpeg");
         ImageView button8ImageView = new ImageView(button8Image);
         button8ImageView.setPreserveRatio(true);
         button8ImageView.setFitHeight(button8.getPrefHeight() - 50);
@@ -138,11 +150,11 @@ public class POSApplication extends Application {
         button8.setGraphic(button8ImageView);
 
         Button button9 = new Button();
-        button9.setText("Black tea");
+        button9.setText(database.getItemName(9));
         button9.setPrefSize(150, 150);
         button9.setContentDisplay(ContentDisplay.TOP);
 
-        Image button9Image = new Image("file:images/black-tea.jpg");
+        Image button9Image = new Image("file:images/chocolate-milk-tea.jpg");
         ImageView button9ImageView = new ImageView(button9Image);
         button9ImageView.setPreserveRatio(true);
         button9ImageView.setFitHeight(button9.getPrefHeight() - 50);
@@ -150,11 +162,11 @@ public class POSApplication extends Application {
         button9.setGraphic(button9ImageView);
 
         Button button10 = new Button();
-        button10.setText("Coconut milk tea");
+        button10.setText(database.getItemName(10));
         button10.setPrefSize(150, 150);
         button10.setContentDisplay(ContentDisplay.TOP);
 
-        Image button10Image = new Image("file:images/coconut-milk-tea.jpg");
+        Image button10Image = new Image("file:images/black-tea.jpg");
         ImageView button10ImageView = new ImageView(button10Image);
         button10ImageView.setPreserveRatio(true);
         button10ImageView.setFitHeight(button10.getPrefHeight() - 50);
@@ -162,11 +174,11 @@ public class POSApplication extends Application {
         button10.setGraphic(button10ImageView);
 
         Button button11 = new Button();
-        button11.setText("Coffee milk tea");
+        button11.setText(database.getItemName(11));
         button11.setPrefSize(150, 150);
         button11.setContentDisplay(ContentDisplay.TOP);
 
-        Image button11Image = new Image("file:images/coffee-milk-tea.jpg");
+        Image button11Image = new Image("file:images/honeydew-milk-tea.jpg");
         ImageView button11ImageView = new ImageView(button11Image);
         button11ImageView.setPreserveRatio(true);
         button11ImageView.setFitHeight(button11.getPrefHeight() - 50);
@@ -174,11 +186,11 @@ public class POSApplication extends Application {
         button11.setGraphic(button11ImageView);
 
         Button button12 = new Button();
-        button12.setText("Honeydew milk tea");
+        button12.setText(database.getItemName(12));
         button12.setPrefSize(150, 150);
         button12.setContentDisplay(ContentDisplay.TOP);
 
-        Image button12Image = new Image("file:images/honeydew-milk-tea.jpg");
+        Image button12Image = new Image("file:images/coffee-milk-tea.jpg");
         ImageView button12ImageView = new ImageView(button12Image);
         button12ImageView.setPreserveRatio(true);
         button12ImageView.setFitHeight(button12.getPrefHeight() - 50);
@@ -186,11 +198,11 @@ public class POSApplication extends Application {
         button12.setGraphic(button12ImageView);
 
         Button button13 = new Button();
-        button13.setText("Brown sugar milk tea");
+        button13.setText(database.getItemName(13));
         button13.setPrefSize(150, 150);
         button13.setContentDisplay(ContentDisplay.TOP);
 
-        Image button13Image = new Image("file:images/brown-sugar-milk-tea.jpg");
+        Image button13Image = new Image("file:images/matcha-milk-tea.jpg");
         ImageView button13ImageView = new ImageView(button13Image);
         button13ImageView.setPreserveRatio(true);
         button13ImageView.setFitHeight(button13.getPrefHeight() - 50);
@@ -198,11 +210,11 @@ public class POSApplication extends Application {
         button13.setGraphic(button13ImageView);
 
         Button button14 = new Button();
-        button14.setText("Almond milk tea");
+        button14.setText(database.getItemName(14));
         button14.setPrefSize(150, 150);
         button14.setContentDisplay(ContentDisplay.TOP);
 
-        Image button14Image = new Image("file:images/almond-milk-tea.jpg");
+        Image button14Image = new Image("file:images/oreo-milk-tea.jpg");
         ImageView button14ImageView = new ImageView(button14Image);
         button14ImageView.setPreserveRatio(true);
         button14ImageView.setFitHeight(button14.getPrefHeight() - 50);
@@ -210,11 +222,11 @@ public class POSApplication extends Application {
         button14.setGraphic(button14ImageView);
 
         Button button15 = new Button();
-        button15.setText("Caramel milk tea");
+        button15.setText(database.getItemName(15));
         button15.setPrefSize(150, 150);
         button15.setContentDisplay(ContentDisplay.TOP);
 
-        Image button15Image = new Image("file:images/caramel-milk-tea.jpg");
+        Image button15Image = new Image("file:images/peach-milk-tea.jpg");
         ImageView button15ImageView = new ImageView(button15Image);
         button15ImageView.setPreserveRatio(true);
         button15ImageView.setFitHeight(button15.getPrefHeight() - 50);
@@ -222,11 +234,11 @@ public class POSApplication extends Application {
         button15.setGraphic(button15ImageView);
 
         Button button16 = new Button();
-        button16.setText("Peach milk tea");
+        button16.setText(database.getItemName(16));
         button16.setPrefSize(150, 150);
         button16.setContentDisplay(ContentDisplay.TOP);
 
-        Image button16Image = new Image("file:images/peach-milk-tea.jpg");
+        Image button16Image = new Image("file:images/coconut-milk-tea.jpg");
         ImageView button16ImageView = new ImageView(button16Image);
         button16ImageView.setPreserveRatio(true);
         button16ImageView.setFitHeight(button16.getPrefHeight() - 50);
@@ -242,27 +254,60 @@ public class POSApplication extends Application {
         subtotal.setFont(Font.font("verdana", 20));
         subtotal.setWrappingWidth(subtotalBar.getWidth() - 10);
 
-        // root group
+        // middle group
         Group root = new Group(bottomBar,
                 subtotalBar,
-                button1,
-                button2,
-                button3,
-                button4,
-                button5,
-                button6,
-                button7,
-                button8,
-                button9,
-                button10,
-                button11,
-                button12,
-                button13,
-                button14,
-                button15,
-                button16,
                 subtotal,
                 checkout);
+
+        if(database.getItemName(1) != ""){
+            root.getChildren().add(button1);
+        }
+        if(database.getItemName(2) != ""){
+            root.getChildren().add(button2);
+        }
+        if(database.getItemName(3) != ""){
+            root.getChildren().add(button3);
+        }
+        if(database.getItemName(4) != ""){
+            root.getChildren().add(button4);
+        }
+        if(database.getItemName(5) != ""){
+            root.getChildren().add(button5);
+        }
+        if(database.getItemName(6) != ""){
+            root.getChildren().add(button6);
+        }
+        if(database.getItemName(7) != ""){
+            root.getChildren().add(button7);
+        }
+        if(database.getItemName(8) != ""){
+            root.getChildren().add(button8);
+        }
+        if(database.getItemName(9) != ""){
+            root.getChildren().add(button9);
+        }
+        if(database.getItemName(10) != ""){
+            root.getChildren().add(button10);
+        }
+        if(database.getItemName(11) != ""){
+            root.getChildren().add(button11);
+        }
+        if(database.getItemName(12) != ""){
+            root.getChildren().add(button12);
+        }
+        if(database.getItemName(13) != ""){
+            root.getChildren().add(button13);
+        }
+        if(database.getItemName(14) != ""){
+            root.getChildren().add(button14);
+        }
+        if(database.getItemName(15) != ""){
+            root.getChildren().add(button15);
+        }
+        if(database.getItemName(16) != ""){
+            root.getChildren().add(button16);
+        }
 
         Scene scene = new Scene(root, 1080, 720);
 
@@ -275,9 +320,18 @@ public class POSApplication extends Application {
         backButton.setText("Back");
         backButton.setPrefSize(300, 50);
 
+        Button finishOrder = new Button();
+        finishOrder.setText("Finish order");
+        finishOrder.setPrefSize(300, 50);
+
+        // checkout group
         Group checkoutRoot = new Group(bottomBar2,
-                backButton);
+                backButton,
+                finishOrder);
         Scene checkoutScene = new Scene(checkoutRoot);
+
+        startOrder.layoutXProperty().bind(scene.widthProperty().divide(2).subtract(startOrder.widthProperty().divide(2)));
+        startOrder.layoutYProperty().bind(scene.heightProperty().divide(2).subtract(startOrder.heightProperty().divide(2)));
 
         bottomBar.layoutYProperty().bind(scene.heightProperty().subtract(bottomBar.heightProperty()));
         bottomBar.widthProperty().bind(scene.widthProperty());
@@ -347,44 +401,71 @@ public class POSApplication extends Application {
         backButton.layoutXProperty().bind(scene.xProperty());
         backButton.layoutYProperty().bind(scene.heightProperty().subtract(backButton.heightProperty()));
 
+        finishOrder.layoutXProperty().bind(scene.widthProperty().subtract(checkout.widthProperty()));
+        finishOrder.layoutYProperty().bind(scene.heightProperty().subtract(checkout.heightProperty()));
 
-        button1.setOnAction(e -> {orderList.add("Matcha Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button2.setOnAction(e -> {orderList.add("Oreo Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button3.setOnAction(e -> {orderList.add("Strawberry Lemonade Smoothie");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button4.setOnAction(e -> {orderList.add("Mango Smoothie");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button5.setOnAction(e -> {orderList.add("Lychee Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button6.setOnAction(e -> {orderList.add("Vanilla Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button7.setOnAction(e -> {orderList.add("Taro Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button8.setOnAction(e -> {orderList.add("Chocolate Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button9.setOnAction(e -> {orderList.add("Black Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button10.setOnAction(e -> {orderList.add("Coconut Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button11.setOnAction(e -> {orderList.add("Coffee Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button12.setOnAction(e -> {orderList.add("Honeydew Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button13.setOnAction(e -> {orderList.add("Brown Sugar Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button14.setOnAction(e -> {orderList.add("Almond Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button15.setOnAction(e -> {orderList.add("Caramel Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        button16.setOnAction(e -> {orderList.add("Peach Milk Tea");
-            subtotal.setText("Subtotal \n" + listToString(orderList));});
-        checkout.setOnAction(e -> stage.setScene(checkoutScene));
+
+        startOrder.setOnAction(e -> {stage.setScene(scene);
+            orderNum = database.addOrder(1);
+            orderList.clear();
+            orderIDList.clear();});
+
+        button1.setOnAction(e -> {orderList.add("Strawberry Lemonade Smoothie");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(1);});
+        button2.setOnAction(e -> {orderList.add("Mango Smoothie");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(2);});
+        button3.setOnAction(e -> {orderList.add("Almond Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(3);});
+        button4.setOnAction(e -> {orderList.add("Caramel Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(4);});
+        button5.setOnAction(e -> {orderList.add("Brown Sugar Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(5);});
+        button6.setOnAction(e -> {orderList.add("Lychee Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(6);});
+        button7.setOnAction(e -> {orderList.add("Vanilla Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(7);});
+        button8.setOnAction(e -> {orderList.add("Taro Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(8);});
+        button9.setOnAction(e -> {orderList.add("Chocolate Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(9);});
+        button10.setOnAction(e -> {orderList.add("Black Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(10);});
+        button11.setOnAction(e -> {orderList.add("Honeydew Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(11);});
+        button12.setOnAction(e -> {orderList.add("Coffee Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(12);});
+        button13.setOnAction(e -> {orderList.add("Matcha Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(13);});
+        button14.setOnAction(e -> {orderList.add("Oreo Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(14);});
+        button15.setOnAction(e -> {orderList.add("Peach Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(15);});
+        button16.setOnAction(e -> {orderList.add("Coconut Milk Tea");
+            subtotal.setText("Subtotal \n" + listToString(orderList));
+            orderIDList.add(16);});
+        checkout.setOnAction(e -> {stage.setScene(checkoutScene);});
+
         backButton.setOnAction(e -> stage.setScene(scene));
+        finishOrder.setOnAction(e -> {addAllItems(orderIDList);
+            stage.setScene(firstScene);});
 
         stage.setTitle("GUI");
-        stage.setScene(scene);
+        stage.setScene(firstScene);
         stage.show();
     }
 
@@ -394,6 +475,12 @@ public class POSApplication extends Application {
             temp = temp + list.get(i) + "\n";
         }
         return temp;
+    }
+
+    public void addAllItems(List<Integer> list){
+        for(int i = 0; i < list.size(); i++){
+            database.addToOrder(orderNum, list.get(i));
+        }
     }
 
     public static void main(String[] args) {
