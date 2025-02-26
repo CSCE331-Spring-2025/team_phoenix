@@ -16,10 +16,6 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-// Add a section called 'Employees' with sections for First Name, Last Name, and Employee ID, do what rubric says
-
-// Change categories to Non-Perishables, Bases, Powder, Toppings
-
 public class ManagementUI extends Application {
     private VBox categoryContent;
     private VBox employeeList;
