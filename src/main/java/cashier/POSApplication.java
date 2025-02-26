@@ -245,6 +245,11 @@ public class POSApplication extends Application {
         button16ImageView.setFitWidth(button16.getPrefWidth());
         button16.setGraphic(button16ImageView);
 
+        Button button17 = new Button();
+        button17.setText(database.getItemName(17));
+        button17.setPrefSize(150, 150);
+        button17.setContentDisplay(ContentDisplay.TOP);
+
         Button checkout = new Button();
         checkout.setText("Checkout");
         checkout.setPrefSize(300, 50);
@@ -307,6 +312,9 @@ public class POSApplication extends Application {
         }
         if(database.getItemName(16) != ""){
             root.getChildren().add(button16);
+        }
+        if(database.getItemName(17) != ""){
+            root.getChildren().add(button17);
         }
 
         Scene scene = new Scene(root, 1080, 720);
@@ -386,6 +394,9 @@ public class POSApplication extends Application {
 
         button16.layoutXProperty().bind(button15.layoutXProperty().add(150));
         button16.layoutYProperty().bind(button15.layoutYProperty());
+
+        button17.layoutXProperty().bind(button13.layoutXProperty());
+        button17.layoutYProperty().bind(button13.layoutYProperty().add(150));
 
         subtotal.layoutXProperty().bind(scene.widthProperty().subtract(subtotalBar.widthProperty()).add(10));
         subtotal.layoutYProperty().bind(scene.heightProperty().subtract(subtotalBar.heightProperty()).add(30));
