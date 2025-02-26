@@ -155,4 +155,52 @@ public class Database {
         }
         return orderID;
     }
+
+    public boolean subtractIngredient(int ingredient_id) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = " + ingredient_id + " AND quantity > 0";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+
+    public boolean updateItemName(int item_id, String newName) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE menu_items SET item_name = '" + newName + "' WHERE id = " + item_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+    
+    public boolean updateItemPrice(int item_id, double newPrice) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE menu_items SET price = " + newPrice + " WHERE id = " + item_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+    
+    
 }
+
+
+
