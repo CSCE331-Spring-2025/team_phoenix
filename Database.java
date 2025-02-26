@@ -159,7 +159,8 @@ public class Database {
     public boolean subtractIngredient(int ingredient_id) {
         boolean success = false;
         try {
-            String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = " + ingredient_id + " AND quantity > 0";
+            String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = " + ingredient_id
+                    + " AND quantity > 0";
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -169,7 +170,6 @@ public class Database {
         }
         return success;
     }
-
 
     public boolean updateItemName(int item_id, String newName) {
         boolean success = false;
@@ -184,7 +184,7 @@ public class Database {
         }
         return success;
     }
-    
+
     public boolean updateItemPrice(int item_id, double newPrice) {
         boolean success = false;
         try {
@@ -198,9 +198,50 @@ public class Database {
         }
         return success;
     }
-    
-    
+
+    /**
+     * For delivery GUI to update the current {@code quantity} with the
+     * {@code amount} on the truck.
+     * 
+     * @param inventory_id
+     * @param amount       To add to current quantity.
+     * @return The updated quantity.
+     */
+    public int addToInventory(int inventory_id, int amount) {
+        int quantity = -1;
+        try {
+            String statement = "UPDATE inventory SET quantity = quantity + " + amount +
+                    " WHERE id = " + inventory_id + " RETURNING quantity";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                quantity = result.getInt("quantity");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return quantity;
+    }
+
+    /**
+     * To update {@code quantity} to the current count from manager GUI.
+     * 
+     * @param inventory_id
+     * @param amount       The most current phyical count of the inventory item.
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean updateInventory(int inventory_id, int amount) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE inventory SET quantity = " + amount
+                    + " WHERE id = " + inventory_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
 }
-
-
-
