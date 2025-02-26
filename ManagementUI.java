@@ -310,14 +310,34 @@ public class ManagementUI extends Application {
         managerPinField.setPromptText("Manager 4-digit PIN");
         Button addEmployeeButton = new Button("Add Employee");
 
+        TextField employeeIdField = new TextField();
+        employeeIdField.setPromptText("ID of employee that will be updated");
+        TextField updateFirstNameField = new TextField();
+        updateFirstNameField.setPromptText("Change First Name");
+        TextField updateLastNameField = new TextField();
+        updateLastNameField.setPromptText("Change Last Name");
+        CheckBox updateIsManagerCheckbox = new CheckBox("Change Manager Status");
+        TextField updateManagerPinField = new TextField();
+        updateManagerPinField.setPromptText("Change Manager 4-digit PIN");
+        Button updateEmployeeButton = new Button("Update Employee");
+
         addEmployeeButton.setOnAction(e -> {
             addEmployee(firstNameField.getText(), lastNameField.getText(),
                     isManagerCheckbox.isSelected(), managerPinField.getText());
             updateEmployeeList(); // Refresh UI
         });
 
+        updateEmployeeButton.setOnAction(e -> {
+            updateCurrentEmployee(Integer.parseInt(employeeIdField.getText()), updateFirstNameField.getText(),
+                    updateLastNameField.getText(), updateIsManagerCheckbox.isSelected());
+            updateEmployeeList(); // Refresh UI
+        });
+
         layout.getChildren().addAll(new Label("Add Employee:"), firstNameField, lastNameField, isManagerCheckbox,
-                managerPinField, addEmployeeButton, new Label("Employees:"), employeeList);
+                managerPinField, addEmployeeButton, new Label("Update an Existing Employee: "), employeeIdField,
+                updateFirstNameField, updateLastNameField, updateIsManagerCheckbox, updateManagerPinField,
+                updateEmployeeButton,
+                new Label("Employees:"), employeeList);
 
         updateEmployeeList(); // Load employees from database
 
@@ -340,6 +360,26 @@ public class ManagementUI extends Application {
             System.out.println("Added employee: " + firstName + " " + lastName);
 
             updateEmployeeList(); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName, boolean isManager) {
+        String updateQuery = "UPDATE employees SET first_name = ?, last_name = ?, is_manager = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setString(1, newFirstName);
+            stmt.setString(2, newLastName);
+            stmt.setBoolean(3, isManager);
+            stmt.setInt(4, employeeId);
+
+            stmt.executeUpdate();
+            System.out.println("Updated employee ID " + employeeId);
+
+            updateMenuList(); // Refresh UI
         } catch (Exception e) {
             e.printStackTrace();
         }
