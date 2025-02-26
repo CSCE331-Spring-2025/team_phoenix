@@ -52,6 +52,7 @@ public class ManagementUI extends Application {
                 .setOnAction(e -> root.setCenter(createCountInventorySection(getFirstSupplierID())));
         ((Button) topMenu.getChildren().get(2)).setOnAction(e -> root.setCenter(createTrendsSection()));
         ((Button) topMenu.getChildren().get(3)).setOnAction(e -> root.setCenter(createEmployeesSection()));
+        ((Button) topMenu.getChildren().get(4)).setOnAction(e -> root.setCenter(createMenuSection()));
 
     }
 
@@ -76,14 +77,16 @@ public class ManagementUI extends Application {
         Button countInventoryButton = new Button("Count Inventory");
         Button trendsButton = new Button("Trends");
         Button employeesButton = new Button("Employees");
+        Button menuButton = new Button("Menu");
 
-        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, trendsButton, employeesButton);
+        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, trendsButton, employeesButton, menuButton);
         return topMenu;
     }
 
     // Function for making the category menu
     private Map<String, Integer> supplierMap = new HashMap<>(); // Store supplier name -> ID mapping
 
+    // Create the supplier dropdown menu for the management UI
     private HBox createSupplierMenu(java.util.function.Consumer<Integer> updateFunction) {
         HBox supplierMenu = new HBox(10);
         ComboBox<String> supplierDropdown = new ComboBox<>();
@@ -135,6 +138,7 @@ public class ManagementUI extends Application {
         }
     }
 
+    // Update the inventory content for the delivery section
     private void updateSupplierContent(VBox deliveryContent, int supplierId) {
         deliveryContent.getChildren().clear();
 
@@ -183,6 +187,7 @@ public class ManagementUI extends Application {
         return layout;
     }
 
+    // Update the inventory quantity for the delivery section
     private void updateInventory(int supplierId, String itemName, String inputQuantity) {
         String updateQuery = "UPDATE inventory SET quantity = quantity + ? WHERE supplier_id = ? AND item_name = ?";
 
@@ -202,6 +207,7 @@ public class ManagementUI extends Application {
         }
     }
 
+    // create the count inventory section for the management UI, with a section for
     private VBox createCountInventorySection(int supplierID) {
         VBox layout = new VBox(10);
         VBox inventoryContent = new VBox(); // Separate container for inventory display
@@ -215,6 +221,7 @@ public class ManagementUI extends Application {
         return layout;
     }
 
+    // Update the inventory quantity for the count inventory section
     private void overrideInventory(int supplierId, String itemName, String newQuantity) {
         String updateQuery = "UPDATE inventory SET quantity = ? WHERE supplier_id = ? AND item_name = ?";
 
@@ -234,6 +241,7 @@ public class ManagementUI extends Application {
         }
     }
 
+    // Update the inventory content for the count inventory section
     private void updateSupplierContentForCount(VBox inventoryContent, int supplierId) {
         inventoryContent.getChildren().clear();
 
@@ -261,6 +269,9 @@ public class ManagementUI extends Application {
         }
     }
 
+    // create the trends tab for the management UI, with a line graph showing the
+    // trends of the different drinks, not complete yet, finish soon I spent all
+    // night working on this UI please help me
     private VBox createTrendsSection() {
         VBox layout = new VBox(10);
         layout.getChildren().add(new Label("Set Time Frame: ")); // add db functionality later
@@ -286,6 +297,8 @@ public class ManagementUI extends Application {
         return layout;
     }
 
+    // create tab for employees, with sections for adding new employees and viewing
+    // existing ones
     private VBox createEmployeesSection() {
         VBox layout = new VBox(10);
         employeeList = new VBox(); // Initialize employee list container
@@ -315,6 +328,7 @@ public class ManagementUI extends Application {
         return layout;
     }
 
+    // Adds a new employee to the database
     private void addEmployee(String firstName, String lastName, boolean isManager, String managerPin) {
         String insertQuery = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES (?, ?, ?, ?)";
 
@@ -335,6 +349,8 @@ public class ManagementUI extends Application {
         }
     }
 
+    // Updates the employee list in the UI (once a new employee is added, refreshes
+    // it and shows the updated list)
     private void updateEmployeeList() {
         employeeList.getChildren().clear();
 
@@ -354,6 +370,97 @@ public class ManagementUI extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // creates the menu tab for the management UI, with places to add new menu items
+    // and update the prices of existing ones
+    private VBox createMenuSection() {
+        VBox layout = new VBox(10);
+        layout.getChildren().add(new Label("Menu Items"));
+
+        String query = "SELECT item_name, price FROM menu_items";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                double price = rs.getDouble("price");
+
+                Label label = new Label(itemName + " - $" + String.format("%.2f", price));
+                layout.getChildren().add(label);
+
+                TextField priceField = new TextField(String.format("%.2f", price));
+                Button updateButton = new Button("Update Price");
+
+                updateButton.setOnAction(e -> {
+                    updateMenuItemPrice(itemName, Double.parseDouble(priceField.getText()));
+                    createMenuSection(); // Refresh UI
+                });
+
+                HBox itemRow = new HBox(10, label, priceField, updateButton);
+                layout.getChildren().add(itemRow);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Add new menu item section
+        TextField newItemNameField = new TextField();
+        newItemNameField.setPromptText("Item Name");
+        TextField newItemPriceField = new TextField();
+        newItemPriceField.setPromptText("Price");
+        Button addItemButton = new Button("Add Menu Item");
+
+        addItemButton.setOnAction(e -> {
+            addMenuItem(newItemNameField.getText(), Double.parseDouble(newItemPriceField.getText()));
+            createMenuSection(); // Refresh UI
+        });
+
+        layout.getChildren().addAll(new Label("Add New Menu Item:"), newItemNameField, newItemPriceField,
+                addItemButton);
+        return layout;
+    }
+
+    // adds a new menu item to the database
+    private void addMenuItem(String itemName, double price) {
+        String insertQuery = "INSERT INTO menu_items (item_name, price) VALUES (?, ?)";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+
+            stmt.setString(1, itemName);
+            stmt.setDouble(2, price);
+
+            stmt.executeUpdate();
+            System.out.println("Added menu item: " + itemName);
+
+            updateMenuList(); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateMenuItemPrice(String itemName, double newPrice) {
+        String updateQuery = "UPDATE menu_items SET price = ? WHERE item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setDouble(1, newPrice);
+            stmt.setString(2, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Updated " + itemName + " price to $" + newPrice);
+
+            updateMenuList(); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateMenuList() {
+        createMenuSection(); // Refresh UI
     }
 
     public static void main(String[] args) {
