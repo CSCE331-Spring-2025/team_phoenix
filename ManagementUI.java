@@ -10,6 +10,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.beans.VetoableChangeListenerProxy;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 public class ManagementUI extends Application {
     private VBox categoryContent;
+    private VBox employeeList;
 
     @Override
     public void start(Stage primaryStage) {
@@ -48,6 +51,7 @@ public class ManagementUI extends Application {
         ((Button) topMenu.getChildren().get(1))
                 .setOnAction(e -> root.setCenter(createCountInventorySection(getFirstSupplierID())));
         ((Button) topMenu.getChildren().get(2)).setOnAction(e -> root.setCenter(createTrendsSection()));
+        ((Button) topMenu.getChildren().get(3)).setOnAction(e -> root.setCenter(createEmployeesSection()));
 
     }
 
@@ -71,8 +75,9 @@ public class ManagementUI extends Application {
         Button deliveryButton = new Button("Delivery");
         Button countInventoryButton = new Button("Count Inventory");
         Button trendsButton = new Button("Trends");
+        Button employeesButton = new Button("Employees");
 
-        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, trendsButton);
+        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, trendsButton, employeesButton);
         return topMenu;
     }
 
@@ -279,6 +284,76 @@ public class ManagementUI extends Application {
                 new Label("Oreo Milk Tea - Blue"), new Label("Matcha Milk Tea - Green")); // placeholders, change once
                                                                                           // database is connected
         return layout;
+    }
+
+    private VBox createEmployeesSection() {
+        VBox layout = new VBox(10);
+        employeeList = new VBox(); // Initialize employee list container
+
+        layout.getChildren().add(new Label("Manage Employees"));
+
+        TextField firstNameField = new TextField();
+        firstNameField.setPromptText("First Name");
+        TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Last Name");
+        CheckBox isManagerCheckbox = new CheckBox("Is Manager?");
+        TextField managerPinField = new TextField();
+        managerPinField.setPromptText("Manager 4-digit PIN");
+        Button addEmployeeButton = new Button("Add Employee");
+
+        addEmployeeButton.setOnAction(e -> {
+            addEmployee(firstNameField.getText(), lastNameField.getText(),
+                    isManagerCheckbox.isSelected(), managerPinField.getText());
+            updateEmployeeList(); // Refresh UI
+        });
+
+        layout.getChildren().addAll(new Label("Add Employee:"), firstNameField, lastNameField, isManagerCheckbox,
+                managerPinField, addEmployeeButton, new Label("Employees:"), employeeList);
+
+        updateEmployeeList(); // Load employees from database
+
+        return layout;
+    }
+
+    private void addEmployee(String firstName, String lastName, boolean isManager, String managerPin) {
+        String insertQuery = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+
+            stmt.setString(1, firstName);
+            stmt.setString(2, lastName);
+            stmt.setBoolean(3, isManager);
+            stmt.setString(4, managerPin);
+
+            stmt.executeUpdate();
+            System.out.println("Added employee: " + firstName + " " + lastName);
+
+            updateEmployeeList(); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateEmployeeList() {
+        employeeList.getChildren().clear();
+
+        String query = "SELECT id, first_name, last_name, is_manager FROM employees";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("first_name") + " " + rs.getString("last_name");
+                boolean managerStatus = rs.getBoolean("is_manager");
+                Label label = new Label(name + (managerStatus ? " (Manager)" : ""));
+                employeeList.getChildren().add(label);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
