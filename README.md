@@ -1,64 +1,86 @@
-# team_phoenix
-POS System 
+# GitHub Workflow
+pull -> add -> commit -> push -> merge -> pull
 
-**DATABASE QUERIES**
-Special Query #1: "Weekly Sales History"
-pseudocode: select _count_ of orders grouped by week
-about: given a specific week, how many orders were placed?
-example: "week 1 has 98765 orders"
+Basic git commands:
+- I like to think of 'commit' as a shipping box or package
+  - *git add filename* = putting items in the box
+  - *git commit -m "bla bla bla"* = attaching a label to the box
+  - *git push* = the box is sent to the destination
+- *git checkout* is used to switch branches (doesn't fit in the analogy just useful to know)
 
-Special Query #2: "Realistic Sales History"
-pseudocode: select _count_ of orders, sum of order total grouped by hour
-about: given a specific hour of the day, how many orders were placed and what was the total sum of the orders?
-example: e.g., "12pm has 12345 orders totaling $86753"
+General things to note:
+- Each new branch should represent a 'feature' that you want to implement
+  - This keeps the repository clean and lets everyone work on things separately
+  - I think you guys are already doing this pretty well
+- Main branch ideally always has stable/working code
+  - unfinished features should stay in their respective branches
+  - if you're a bozo and push bad code to main for whatever reason, document it and tell everyone
+- Repository (repo) refers to the entire project, including all files and branches
+  - Remote Repository = what you see on github.com
+  - Local Repository = what you have saved on your computer
+- Git tracks changes per file, not the whole repository or branch (Miles was asking about this kind of scenario)
+  - Even if your branch has an older version of some file, Git recognizes that you didn’t modify it and will keep the updated version in main.
+- I wrote these steps based on using git through the command line, you can do everything using the graphical interface if you prefer
 
-Special Query #3: "Peak Sales Day"
-pseudocode: select top 10 sums of order total grouped by day in descending order by order total
-(confusing)about: given a specific day, what was the sum of the top 10 order totals?
-about: pull top 10 sales days, display total sales for said day
-example: "30 August has $12345 of top sales"
+(lmk if you have any other questions)
 
-Query #4: "Popular Drinks"
-pseudocode: select _count_ of drinks in orders grouped by drink in descending order
-about: given a specific drink, how many times has it been ordered?
-example: "Matcha Green Tea has been ordered 12345 times."
+## 1. Create a new branch
+- Always pull from main branch before starting so your files are up-to-date:
+```
+git checkout main
+git pull origin main
+```
+- Create the new feature branch on your local repo:
+```
+git checkout -b branch-name
+```
 
-Query #5: 
-pseudocode: 
-about: 
-example: 
+## 2. Add and commit changes
+- Ideally, you should add and commit pretty often
+  - ex. If you're writing multiple new methods, you should add and commit as you finish each one
+- For the purposes of this project, its fine to just commit everything together
+```
+git add .
+git commit -m "overview of changes"
+```
 
-Query #6:
-pseudocode: 
-about: 
-example: 
+## 3. Push your branch to GitHub
+- This is sending the new branch from local to remote (GitHub)
+- You can do this whenever, I like to push at the end of every session
+```
+git push origin branch-name
+```
 
-Query #7:
-pseudocode: 
-about: 
-example: 
+## 4. Open a pull request (PR) on GitHub
+- Go to this repository on GitHub and create a PR
+- Always resolve conflicts before merging!!
+  - Ask someone to review the PR if you're unsure
+- No Conflicts: Merge commit (don't mess with Squash or Rebase, they're more complicated)
 
-Query #8:
-pseudocode: 
-about: 
-example: 
+## 5. After merging, update the repos
+- update your *local* 'main' branch (with the changes you just merged to the *remote* 'main' branch)
+```
+git checkout main
+git pull origin main
+```
 
-Query #9:
-pseudocode: 
-about: 
-example: 
+## 6. Clean up (Optional)
+- When the feature is 100% complete, you can delete the branch.
+  - Some of our big files won't really be complete until the project is done
 
-Query #10:
-pseudocode: 
-about: 
-example: 
+delete on local repository:
+```
+git branch -d branch-name
+```
+delete on remote repository:
+```
+git push origin --delete branch-name
+```
 
-Query #11:
-pseudocode: 
-about: 
-example: 
-
-Query #12:
-pseudocode: 
-about: 
-example: 
+## Note: If `main` updates while you're working
+```
+git checkout main
+git pull origin main
+git checkout feature-branch-name
+git merge main
+```
