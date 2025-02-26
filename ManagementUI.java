@@ -79,11 +79,11 @@ public class ManagementUI extends Application {
     // Function for making the category menu
     private Map<String, Integer> supplierMap = new HashMap<>(); // Store supplier name -> ID mapping
 
-    private HBox createSupplierMenu() {
+    private HBox createSupplierMenu(java.util.function.Consumer<Integer> updateFunction) {
         HBox supplierMenu = new HBox(10);
         ComboBox<String> supplierDropdown = new ComboBox<>();
 
-        String query = "SELECT id, supplier_name FROM suppliers"; // Assuming suppliers table has 'name' column
+        String query = "SELECT id, supplier_name FROM suppliers";
 
         try (Connection conn = DatabaseConnection.connect();
                 PreparedStatement stmt = conn.prepareStatement(query);
@@ -93,7 +93,7 @@ public class ManagementUI extends Application {
                 int supplierId = rs.getInt("id");
                 String supplierName = rs.getString("supplier_name");
 
-                supplierMap.put(supplierName, supplierId); // Store name -> ID mapping
+                supplierMap.put(supplierName, supplierId);
                 supplierDropdown.getItems().add(supplierName);
             }
         } catch (Exception e) {
@@ -104,11 +104,7 @@ public class ManagementUI extends Application {
             String selectedSupplier = supplierDropdown.getValue();
             if (selectedSupplier != null) {
                 int supplierId = supplierMap.get(selectedSupplier);
-                VBox deliveryContent = new VBox();
-                updateSupplierContent(deliveryContent, supplierId);
-
-                BorderPane root = (BorderPane) supplierMenu.getScene().getRoot();
-                root.setCenter(deliveryContent);
+                updateFunction.accept(supplierId); // Calls the correct UI update function
             }
         });
 
@@ -149,12 +145,17 @@ public class ManagementUI extends Application {
                 String itemName = rs.getString("item_name");
                 int quantity = rs.getInt("quantity");
 
+                Label quantityLabel = new Label("Current: " + quantity); // Show current stock
                 TextField quantityField = new TextField();
                 Button updateButton = new Button("Update");
 
-                updateButton.setOnAction(e -> updateInventory(supplierId, itemName, quantityField.getText()));
+                updateButton.setOnAction(e -> {
+                    updateInventory(supplierId, itemName, quantityField.getText());
+                    updateSupplierContent(deliveryContent, supplierId); // Refresh the UI
+                });
 
-                deliveryContent.getChildren().addAll(new Label(itemName), quantityField, updateButton);
+                HBox itemRow = new HBox(10, new Label(itemName), quantityLabel, quantityField, updateButton);
+                deliveryContent.getChildren().add(itemRow);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -165,9 +166,12 @@ public class ManagementUI extends Application {
     // (Delivery, Count Inventory, Trends)
     private VBox createDeliverySection(int supplierID) {
         VBox layout = new VBox(10);
-        HBox supplierMenu = createSupplierMenu(); // Supplier dropdown menu
-
         VBox deliveryContent = new VBox(); // Fresh VBox for the supplier's inventory items
+
+        HBox supplierMenu = createSupplierMenu(supplierId -> updateSupplierContent(deliveryContent, supplierId)); // Supplier
+                                                                                                                  // dropdown
+                                                                                                                  // menu
+
         updateSupplierContent(deliveryContent, supplierID); // Load items dynamically
 
         layout.getChildren().addAll(supplierMenu, deliveryContent);
@@ -195,9 +199,11 @@ public class ManagementUI extends Application {
 
     private VBox createCountInventorySection(int supplierID) {
         VBox layout = new VBox(10);
-        HBox supplierMenu = createSupplierMenu();
-
         VBox inventoryContent = new VBox(); // Separate container for inventory display
+
+        HBox supplierMenu = createSupplierMenu(
+                supplierId -> updateSupplierContentForCount(inventoryContent, supplierId));
+
         updateSupplierContentForCount(inventoryContent, supplierID); // Load inventory for counting
 
         layout.getChildren().addAll(supplierMenu, inventoryContent);
