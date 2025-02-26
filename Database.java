@@ -155,7 +155,7 @@ public class Database {
     public Map<String, Integer> getSupplierNames() {
         Map<String, Integer> supplierMap = new HashMap<>();
         try {
-            String statement = "SELECT * FROM suppliers";
+            String statement = "SELECT * FROM suppliers ORDER BY id ASC";
             ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
@@ -173,7 +173,7 @@ public class Database {
      * 
      * @param order_id
      * @param menu_id
-     * @return
+     * @return {@code boolean} wheather inventory was successfully updated.
      */
     public boolean addToOrder(int order_id, int menu_id) {
         boolean added = false;
@@ -189,6 +189,8 @@ public class Database {
         }
         return added;
     }
+
+    // TODO: get order price
 
     /**
      * 
@@ -210,10 +212,12 @@ public class Database {
     }
 
     /**
+     * @deprecated SQL trigger does this automatically.
      * 
      * @param ingredient_id
      * @return
      */
+    @Deprecated
     public boolean subtractIngredient(int ingredient_id) {
         boolean success = false;
         try {
@@ -229,11 +233,14 @@ public class Database {
         return success;
     }
 
+    // TODO: menu_items add new item (takes- name, price)
+    // TODO: menu_items delete item (takes- id)
+
     /**
      * 
      * @param item_id
      * @param newName
-     * @return
+     * @return {@code boolean} wheather inventory was successfully updated.
      */
     public boolean updateItemName(int item_id, String newName) {
         boolean success = false;
@@ -269,6 +276,8 @@ public class Database {
         return success;
     }
 
+    // TODO: inventory item map () {name, id, quantity, supplierID}
+
     /**
      * For delivery GUI to update the current {@code quantity} with the
      * {@code amount} on the truck.
@@ -293,6 +302,8 @@ public class Database {
     }
 
     /**
+     * Table "public.inventory"
+     * <p>
      * To update {@code quantity} to the current count from manager GUI.
      * 
      * @param inventory_id
@@ -313,5 +324,25 @@ public class Database {
         }
         return success;
     }
+
+    // TODO: employees add new employee
+    // TODO: employees update info
+    // TODO: employees change to is manager
+    // TODO: employees removes
+
+    // public boolean addToOrder(int order_id, int menu_id) {
+    //     boolean added = false;
+    //     try {
+    //         String statement = "INSERT INTO items_in_order (order_id, menu_id) VALUES ("
+    //                 + order_id + ", " + menu_id + ")";
+    //         int x = update(statement);
+    //         if (x > 0) {
+    //             added = true;
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    //     return added;
+    // }
 
 }
