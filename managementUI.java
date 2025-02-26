@@ -1,5 +1,6 @@
 package management;
 
+import management.DatabaseConnection;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -9,6 +10,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 // Add a section called 'Employees' with sections for First Name, Last Name, and Employee ID, do what rubric says
 
@@ -28,7 +32,7 @@ public class managementUI extends Application {
         BorderPane root = new BorderPane();
         root.setTop(topMenu);
 
-        // Starting screen (In this case, Delivery section for Cups)
+        // Starting screen (In this case, Delivery section for Non-perishables)
         categoryContent = new VBox();
         root.setCenter(createDeliverySection("Non-Perishables"));
         Scene mainScene = new Scene(root, 800, 600);
@@ -58,131 +62,163 @@ public class managementUI extends Application {
     }
 
     // Function for making the category menu
-    private HBox createCategoryMenu() {
-        HBox categoryMenu = new HBox(10);
-        String[] categories = { "Non-Perishables", "Milk", "Syrup", "Flavoring", "Fruit", "Miscellaneous" }; // change
-                                                                                                             // later
-        for (String category : categories) {
-            Button button = new Button(category);
-            button.setOnAction(e -> updateCategoryContent(category));
-            categoryMenu.getChildren().add(button);
+    private Map<String, Integer> supplierMap = new HashMap<>(); // Store supplier name -> ID mapping
+
+    private HBox createSupplierMenu() {
+        HBox supplierMenu = new HBox(10);
+        ComboBox<String> supplierDropdown = new ComboBox<>();
+
+        String query = "SELECT id, supplier_name FROM suppliers"; // Assuming suppliers table has 'name' column
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int supplierId = rs.getInt("id");
+                String supplierName = rs.getString("name");
+
+                supplierMap.put(supplierName, supplierId); // Store name -> ID mapping
+                supplierDropdown.getItems().add(supplierName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return categoryMenu;
+
+        supplierDropdown.setOnAction(e -> {
+            String selectedSupplier = supplierDropdown.getValue();
+            if (selectedSupplier != null) {
+                int supplierId = supplierMap.get(selectedSupplier);
+                updateSupplierContent(supplierId);
+            }
+        });
+
+        supplierMenu.getChildren().addAll(new Label("Select Supplier:"), supplierDropdown);
+        return supplierMenu;
     }
 
     // Actual items for category, placeholders for now until database is connected
     // Added all the flavoring from Menu Items.txt on out github
-    private void updateCategoryContent(String category) { // make categories milk,flavor, non-perishables
-        categoryContent.getChildren().clear();
-        switch (category) {
-            case "Non-Perishables":
-                categoryContent.getChildren().addAll(new Label("Straws"), new TextField(),
-                        new Label("Napkins"), new TextField(),
-                        new Label("Lids"), new TextField(),
-                        new Label("Cup Holders"), new TextField(),
-                        new Label("Cups"), new TextField());
-                break;
-            /*
-             * case "Milk":
-             * categoryContent.getChildren().addAll(new Label("Whole Milk"), new
-             * TextField(),
-             * new Label("2% Milk"), new TextField(),
-             * new Label("Nonfat Milk"), new TextField(),
-             * new Label("Soy Milk"), new TextField(),
-             * new Label("Lactose-Free Milk"), new TextField(),
-             * new Label("Almond Milk"), new TextField(),
-             * new Label("Coconut Milk"), new TextField(),
-             * new Label("Oat Milk"), new TextField());
-             * break;
-             */
-            case "Syrup":
-                categoryContent.getChildren().addAll(new Label("Vanilla"), new TextField(),
-                        new Label("Caramel"), new TextField(),
-                        new Label("Chocolate"), new TextField());
-                break;
-            case "Flavoring":
-                categoryContent.getChildren().addAll(new Label("Chocolate"), new TextField(),
-                        new Label("Caramel"), new TextField(),
-                        new Label("Honeydew"), new TextField(),
-                        new Label("Coconut"), new TextField(),
-                        new Label("Peach"), new TextField(),
-                        new Label("Almond"), new TextField());
-                break;
-            case "Fruit":
-                categoryContent.getChildren().addAll(new Label("Peach"), new TextField(),
-                        new Label("Frozen Strawberry"), new TextField(),
-                        new Label("Honeydew"), new TextField(),
-                        new Label("Lychee"), new TextField(),
-                        new Label("Mango"), new TextField());
-                break;
-            case "Miscellaneous": // add vanilla essence
-                TextField cocoaInField = new TextField();
-                TextField taroInField = new TextField();
-                TextField matchaPowderInField = new TextField();
-                TextField lemonadeMixInField = new TextField();
-                TextField brownSugarInField = new TextField();
-                TextField oreosInField = new TextField();
-                TextField teaMixInField = new TextField();
+    private void updateInventory(String itemName, String newQuantity) {
+        String updateQuery = "UPDATE inventory SET quantity = ? WHERE item_name = ?";
 
-                Button submitCocoa = new Button("Submit");
-                Button submitTaro = new Button("Submit");
-                Button submitMatcha = new Button("Submit");
-                Button submitLemonade = new Button("Submit");
-                Button submitBrownSugar = new Button("Submit");
-                Button submitOreos = new Button("Submit");
-                Button submitTeaMix = new Button("Submit");
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
 
-                categoryContent.getChildren().addAll(new Label("Cocoa Powder"), cocoaInField, submitCocoa,
-                        new Label("Taro Powder"), taroInField, submitTaro,
-                        new Label("Matcha Powder"), matchaPowderInField, submitMatcha,
-                        new Label("Lemonade Mix"), lemonadeMixInField, submitLemonade,
-                        new Label("Brown Sugar"), brownSugarInField, submitBrownSugar,
-                        new Label("Oreos"), oreosInField, submitOreos,
-                        new Label("Tea mix"), teaMixInField, submitTeaMix);
+            stmt.setInt(1, Integer.parseInt(newQuantity));
+            stmt.setString(2, itemName);
 
-                // below is variable declarations for the different inputs to be inserted into
-                // the database, commented out temporarily
-                /*
-                 * int cocoaInput = cocoaInField.getText();
-                 * int taroInput = taroInField.getText();
-                 * int matchaPowderInput = matchaPowderInField.getText();
-                 * int lemonadeMixInput = lemonadeMixInField.getText();
-                 * int brownSugarInput = brownSugarInField.getText();
-                 * int oreosInput = oreosInField.getText();
-                 * int teaMixInput = teaMixInField.getText();
-                 */
-
-                break;
+            stmt.executeUpdate();
+            System.out.println("Updated " + itemName + " to " + newQuantity);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        // Just testing how to take in input from the text fields
-        /*
-         * TextField inputField = new TextField();
-         * Button submitButton = new Button("Submit");
-         * 
-         * submitButton.setOnAction(e -> {
-         * String input = inputField.getText();
-         * System.out.println("Input: " + input);
-         * // Perform action with the input
-         * });
-         */
+    }
 
-        // categoryContent.getChildren().addAll(inputField, submitButton);
+    private void updateSupplierContent(int supplierId) {
+        categoryContent.getChildren().clear();
+
+        String query = "SELECT item_name, quantity FROM inventory WHERE supplier_id = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, supplierId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                int quantity = rs.getInt("quantity");
+
+                TextField quantityField = new TextField();
+                Button updateButton = new Button("Update");
+
+                updateButton.setOnAction(e -> updateInventory(supplierId, itemName, quantityField.getText()));
+
+                categoryContent.getChildren().addAll(new Label(itemName), quantityField, updateButton);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Functions for creating the different sections of the management POS UI
     // (Delivery, Count Inventory, Trends)
-    private VBox createDeliverySection(String category) {
+    private VBox createDeliverySection() {
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(createCategoryMenu(), categoryContent);
-        updateCategoryContent(category);
+        layout.getChildren().addAll(createSupplierMenu(), categoryContent);
         return layout;
     }
 
-    private VBox createCountInventorySection(String category) {
+    private void updateInventory(int supplierId, String itemName, String inputQuantity) {
+        String updateQuery = "UPDATE inventory SET quantity = quantity + ? WHERE supplier_id = ? AND item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setInt(1, Integer.parseInt(inputQuantity));
+            stmt.setInt(2, supplierId);
+            stmt.setString(3, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Added " + inputQuantity + " to " + itemName);
+
+            updateSupplierContent(supplierId); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private VBox createCountInventorySection() {
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(createCategoryMenu(), categoryContent);
-        updateCategoryContent(category);
+        layout.getChildren().addAll(createSupplierMenu(), categoryContent);
         return layout;
+    }
+
+    private void overrideInventory(int supplierId, String itemName, String newQuantity) {
+        String updateQuery = "UPDATE inventory SET quantity = ? WHERE supplier_id = ? AND item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setInt(1, Integer.parseInt(newQuantity));
+            stmt.setInt(2, supplierId);
+            stmt.setString(3, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Set " + itemName + " quantity to " + newQuantity);
+
+            updateSupplierContent(supplierId); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateSupplierContentForCount(int supplierId) {
+        categoryContent.getChildren().clear();
+
+        String query = "SELECT item_name, quantity FROM inventory WHERE supplier_id = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, supplierId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                int quantity = rs.getInt("quantity");
+
+                TextField quantityField = new TextField();
+                Button updateButton = new Button("Update");
+
+                updateButton.setOnAction(e -> overrideInventory(supplierId, itemName, quantityField.getText()));
+
+                categoryContent.getChildren().addAll(new Label(itemName), quantityField, updateButton);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private VBox createTrendsSection() {
