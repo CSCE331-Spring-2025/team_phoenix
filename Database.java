@@ -11,6 +11,11 @@ import java.util.Map;
 
 */
 
+/**
+ * Creates a connection to the team_phoenix database.
+ * Hosts methods to run queries in the database without the user needing to know
+ * or use SQL commands.
+ */
 public class Database {
     static Connection conn = null;
 
@@ -26,6 +31,13 @@ public class Database {
         } // end try catch
     }
 
+    /**
+     * For SQL quaries that return a table of data.
+     * 
+     * @param statement The query typed into the PSQL terminal.
+     * @return {@code RestultSet} with the SQL quary output.
+     * @throws SQLException
+     */
     ResultSet select(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
         // send statement to DBMS
@@ -33,6 +45,13 @@ public class Database {
         return result;
     }
 
+    /**
+     * For SQL queries that returns no data.
+     * 
+     * @param statement The query typed into the PSQL terminal.
+     * @return {@code int} of the number of rows updated.
+     * @throws SQLException
+     */
     int update(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
         // send statement to DBMS (throws SQLException)
@@ -53,6 +72,11 @@ public class Database {
     // return order_num;
     // }
 
+    /**
+     * 
+     * @param item_id
+     * @return
+     */
     public double getItemPrice(int item_id) {
         double price = -1.0;
         try {
@@ -66,6 +90,11 @@ public class Database {
         return price;
     }
 
+    /**
+     * 
+     * @param item_id
+     * @return
+     */
     public String getItemName(int item_id) {
         String item_name = "";
         try {
@@ -79,6 +108,10 @@ public class Database {
         return item_name;
     }
 
+    /**
+     * 
+     * @return
+     */
     public Map<String, Integer> getMenuItemNames() {
         Map<String, Integer> menuMap = new HashMap<>();
         try {
@@ -96,6 +129,11 @@ public class Database {
         return menuMap;
     }
 
+    /**
+     * 
+     * @param supplier_id
+     * @return
+     */
     public String getSupplierName(int supplier_id) {
         String name = "";
         try {
@@ -110,6 +148,10 @@ public class Database {
         return name;
     }
 
+    /**
+     * 
+     * @return
+     */
     public Map<String, Integer> getSupplierNames() {
         Map<String, Integer> supplierMap = new HashMap<>();
         try {
@@ -127,6 +169,12 @@ public class Database {
         return supplierMap;
     }
 
+    /**
+     * 
+     * @param order_id
+     * @param menu_id
+     * @return
+     */
     public boolean addToOrder(int order_id, int menu_id) {
         boolean added = false;
         try {
@@ -142,6 +190,11 @@ public class Database {
         return added;
     }
 
+    /**
+     * 
+     * @param employee_id
+     * @return
+     */
     public int addOrder(int employee_id) {
         int orderID = -1;
         try {
@@ -156,6 +209,11 @@ public class Database {
         return orderID;
     }
 
+    /**
+     * 
+     * @param ingredient_id
+     * @return
+     */
     public boolean subtractIngredient(int ingredient_id) {
         boolean success = false;
         try {
@@ -171,6 +229,12 @@ public class Database {
         return success;
     }
 
+    /**
+     * 
+     * @param item_id
+     * @param newName
+     * @return
+     */
     public boolean updateItemName(int item_id, String newName) {
         boolean success = false;
         try {
@@ -185,6 +249,12 @@ public class Database {
         return success;
     }
 
+    /**
+     * 
+     * @param item_id
+     * @param newPrice
+     * @return
+     */
     public boolean updateItemPrice(int item_id, double newPrice) {
         boolean success = false;
         try {
