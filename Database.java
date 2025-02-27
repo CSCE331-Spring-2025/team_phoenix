@@ -44,7 +44,7 @@ import java.util.Map;
  * <li>{@link #updateItemName(int, String)}
  * <li>{@link #updateItemPrice(int, double)}
  * <li>{@link #addMenuItem(String, double)}
- * <li>{@link }
+ * <li>{@link #addIngredientsToItem(int, int)}
  * <li>{@link }
  * </ul>
  * 
@@ -253,7 +253,6 @@ public class Database {
         return id;
     }
 
-    // TODO: menu items add ingredients to item
     /**
      * Add an ingredient to a menu item.
      * 
