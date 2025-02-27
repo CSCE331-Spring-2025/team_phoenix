@@ -256,7 +256,7 @@ public class Database {
     /**
      * Add an ingredient to a menu item.
      * 
-     * @param menu_id ~
+     * @param menu_id      ~
      * @param inventory_id ~
      * @return {@code boolean} wheather inventory was successfully updated.
      */
@@ -276,6 +276,20 @@ public class Database {
     }
 
     // TODO: menu_items delete item (takes- id)
+    public boolean removeFromItem(int menu_id, int inventory_id) {
+        boolean success = false;
+        try {
+            String statement = "DELETE FROM ingredients_in_item WHERE menu_id = " + menu_id
+                    + " AND inventory_id = " + inventory_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
 
     /**
      * Pull a supplier's name from suppliers table.
