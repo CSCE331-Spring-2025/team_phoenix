@@ -43,6 +43,8 @@ import java.util.Map;
  * <li>{@link #getItemPrice(int)}
  * <li>{@link #updateItemName(int, String)}
  * <li>{@link #updateItemPrice(int, double)}
+ * <li>{@link #addMenuItem(String, double)}
+ * <li>{@link }
  * <li>{@link }
  * </ul>
  * 
@@ -252,6 +254,28 @@ public class Database {
     }
 
     // TODO: menu items add ingredients to item
+    /**
+     * Add an ingredient to a menu item.
+     * 
+     * @param menu_id ~
+     * @param inventory_id ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean addIngredientsToItem(int menu_id, int inventory_id) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO ingredients_in_item (menu_id, inventory_id) VALUES ("
+                    + menu_id + ", " + inventory_id + ")";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
     // TODO: menu_items delete item (takes- id)
 
     /**
