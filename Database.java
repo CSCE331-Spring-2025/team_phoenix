@@ -13,8 +13,55 @@ import java.util.Map;
 
 /**
  * Creates a connection to the team_phoenix database.
+ * <p>
  * Hosts methods to run queries in the database without the user needing to know
  * or use SQL commands.
+ * <p>
+ * 
+ * <p>
+ * ===========================
+ * TABLE OF CONTENTS
+ * ===========================
+ * <ol>
+ * <li>
+ * Orders
+ * <ul>
+ * <li>{@link #createNewOrder(int)}
+ * <li>{@link #addToOrder(int, int)}
+ * <li>{@link #getOrderSubtotal(int)}
+ * </ul>
+ * 
+ * <li>
+ * Menu Items
+ * <ul>
+ * <li>{@link #getMenuItemNames()}
+ * <li>{@link #getItemName(int)}
+ * <li>{@link #getItemPrice(int)}
+ * <li>{@link #updateItemName(int, String)}
+ * <li>{@link #updateItemPrice(int, double)}
+ * <li>{@link }
+ * </ul>
+ * 
+ * <li>
+ * Inventory
+ * <ul>
+ * <li>{@link #addToInventory(int, int)}
+ * <li>{@link #updateInventory(int, int)}
+ * </ul>
+ * 
+ * <li>
+ * Suppliers
+ * <ul>
+ * <li>{@link #getSupplierNames()}
+ * <li>{@link #getSupplierName(int)}
+ * </ul>
+ * 
+ * <li>
+ * Employees
+ * <ul>
+ * <li>{@link }
+ * </ul>
+ * </ol>
  */
 public class Database {
     static Connection conn = null;
@@ -38,7 +85,7 @@ public class Database {
      * @return {@code RestultSet} with the SQL quary output.
      * @throws SQLException
      */
-    ResultSet select(String statement) throws SQLException {
+    private ResultSet select(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
         // send statement to DBMS
         ResultSet result = stmt.executeQuery(statement);
@@ -52,7 +99,7 @@ public class Database {
      * @return {@code int} of the number of rows updated.
      * @throws SQLException
      */
-    int update(String statement) throws SQLException {
+    private int update(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
         // send statement to DBMS (throws SQLException)
         int result = stmt.executeUpdate(statement);
@@ -64,7 +111,7 @@ public class Database {
     // try {
     // ResultSet result = select("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
     // if (result != null && result.next()) {
-    // order_num = result.getInt("id") + 1;
+    // order_num = result.getInt("id");
     // }
     // } catch (Exception e) {
     // e.printStackTrace();
@@ -73,9 +120,11 @@ public class Database {
     // }
 
     /**
+     * Pull an item's price from menu items table.
      * 
-     * @param item_id
-     * @return
+     * @param item_id ~
+     * @return A {@code double} of the item's price or {@code -1} if item id not
+     *         found.
      */
     public double getItemPrice(int item_id) {
         double price = -1.0;
@@ -91,9 +140,11 @@ public class Database {
     }
 
     /**
+     * Pull an item name from menu items table.
      * 
-     * @param item_id
-     * @return
+     * @param item_id ~
+     * @return A {@code String} of the item's name or empty {@code String} if item
+     *         id not found.
      */
     public String getItemName(int item_id) {
         String item_name = "";
@@ -109,8 +160,10 @@ public class Database {
     }
 
     /**
+     * Pull all item names from menu items table.
      * 
-     * @return
+     * @return A {@code Map} containing all menu item names mapped to their
+     *         respective ids.
      */
     public Map<String, Integer> getMenuItemNames() {
         Map<String, Integer> menuMap = new HashMap<>();
@@ -130,9 +183,56 @@ public class Database {
     }
 
     /**
+     * Change item name in menu items table.
      * 
-     * @param supplier_id
-     * @return
+     * @param item_id ~
+     * @param newName ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean updateItemName(int item_id, String newName) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE menu_items SET item_name = '" + newName + "' WHERE id = " + item_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    /**
+     * Change item price in menu items table.
+     * 
+     * @param item_id  ~
+     * @param newPrice ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean updateItemPrice(int item_id, double newPrice) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE menu_items SET price = " + newPrice + " WHERE id = " + item_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: menu_items add new item (takes- name, price)
+    // TODO: menu_items delete item (takes- id)
+
+    /**
+     * Pull a supplier's name from suppliers table.
+     * 
+     * @param supplier_id ~
+     * @return A {@code String} of the supplier's name or empty string if id not
+     *         found.
      */
     public String getSupplierName(int supplier_id) {
         String name = "";
@@ -149,8 +249,10 @@ public class Database {
     }
 
     /**
+     * Pull all supplier names from suppliers table.
      * 
-     * @return
+     * @return A {@code Map} containing all supplier names mapped to their
+     *         respective ids.
      */
     public Map<String, Integer> getSupplierNames() {
         Map<String, Integer> supplierMap = new HashMap<>();
@@ -170,9 +272,10 @@ public class Database {
     }
 
     /**
+     * Add item to the order.
      * 
-     * @param order_id
-     * @param menu_id
+     * @param order_id ~
+     * @param menu_id  ~
      * @return {@code boolean} wheather inventory was successfully updated.
      */
     public boolean addToOrder(int order_id, int menu_id) {
@@ -190,20 +293,19 @@ public class Database {
         return added;
     }
 
-    // TODO: get order price
-
     /**
+     * Creates a new empty order in orders table.
      * 
-     * @param employee_id
-     * @return
+     * @param employee_id The current cashier on till.
+     * @return The order number for the new order.
      */
-    public int addOrder(int employee_id) {
+    public int createNewOrder(int employee_id) {
         int orderID = -1;
         try {
             String statement = "INSERT INTO orders (employee_id) VALUES (" + employee_id + ") RETURNING id";
-            ResultSet x = select(statement);
-            if (x.next()) {
-                orderID = x.getInt("id");
+            ResultSet result = select(statement);
+            if (result.next()) {
+                orderID = result.getInt("id");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,77 +314,48 @@ public class Database {
     }
 
     /**
-     * @deprecated SQL trigger does this automatically.
+     * Pull the current subtotal to the order from orders table.
      * 
-     * @param ingredient_id
-     * @return
+     * @param order_id ~
+     * @return {@code double} The current order subtotal or {@code -1} if id not
+     *         found.
      */
-    @Deprecated
-    public boolean subtractIngredient(int ingredient_id) {
-        boolean success = false;
+    public double getOrderSubtotal(int order_id) {
+        double subtotal = -1.0;
         try {
-            String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = " + ingredient_id
-                    + " AND quantity > 0";
-            int result = update(statement);
-            if (result > 0) {
-                success = true;
+            String statement = "SELECT * FROM orders WHERE id = " + order_id;
+            ResultSet result = select(statement);
+            if (result.next()) {
+                subtotal = result.getDouble("total_cost");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return success;
+        return subtotal;
     }
 
-    // TODO: menu_items add new item (takes- name, price)
-    // TODO: menu_items delete item (takes- id)
-
-    /**
-     * 
-     * @param item_id
-     * @param newName
-     * @return {@code boolean} wheather inventory was successfully updated.
-     */
-    public boolean updateItemName(int item_id, String newName) {
-        boolean success = false;
-        try {
-            String statement = "UPDATE menu_items SET item_name = '" + newName + "' WHERE id = " + item_id;
-            int result = update(statement);
-            if (result > 0) {
-                success = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return success;
-    }
-
-    /**
-     * 
-     * @param item_id
-     * @param newPrice
-     * @return
-     */
-    public boolean updateItemPrice(int item_id, double newPrice) {
-        boolean success = false;
-        try {
-            String statement = "UPDATE menu_items SET price = " + newPrice + " WHERE id = " + item_id;
-            int result = update(statement);
-            if (result > 0) {
-                success = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return success;
-    }
+    // public boolean subtractIngredient(int ingredient_id) {
+    // boolean success = false;
+    // try {
+    // String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = "
+    // + ingredient_id
+    // + " AND quantity > 0";
+    // int result = update(statement);
+    // if (result > 0) {
+    // success = true;
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // return success;
+    // }
 
     // TODO: inventory item map () {name, id, quantity, supplierID}
 
     /**
-     * For delivery GUI to update the current {@code quantity} with the
-     * {@code amount} on the truck.
+     * Add {@code amount} to the current {@code quantity} in inventory table.
      * 
-     * @param inventory_id
+     * @param inventory_id ~
      * @param amount       To add to current quantity.
      * @return The updated quantity.
      */
@@ -302,11 +375,9 @@ public class Database {
     }
 
     /**
-     * Table "public.inventory"
-     * <p>
-     * To update {@code quantity} to the current count from manager GUI.
+     * Update the {@code quantity} in inventory table.
      * 
-     * @param inventory_id
+     * @param inventory_id ~
      * @param amount       The most current phyical count of the inventory item.
      * @return {@code boolean} wheather inventory was successfully updated.
      */
@@ -331,18 +402,18 @@ public class Database {
     // TODO: employees removes
 
     // public boolean addToOrder(int order_id, int menu_id) {
-    //     boolean added = false;
-    //     try {
-    //         String statement = "INSERT INTO items_in_order (order_id, menu_id) VALUES ("
-    //                 + order_id + ", " + menu_id + ")";
-    //         int x = update(statement);
-    //         if (x > 0) {
-    //             added = true;
-    //         }
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-    //     return added;
+    // boolean added = false;
+    // try {
+    // String statement = "INSERT INTO items_in_order (order_id, menu_id) VALUES ("
+    // + order_id + ", " + menu_id + ")";
+    // int x = update(statement);
+    // if (x > 0) {
+    // added = true;
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // return added;
     // }
 
 }
