@@ -45,7 +45,7 @@ import java.util.Map;
  * <li>{@link #updateItemPrice(int, double)}
  * <li>{@link #addMenuItem(String, double)}
  * <li>{@link #addIngredientsToItem(int, int)}
- * <li>{@link }
+ * <li>{@link #removeFromItem(int, int)}
  * </ul>
  * 
  * <li>
@@ -275,7 +275,12 @@ public class Database {
         return success;
     }
 
-    // TODO: menu_items delete item (takes- id)
+    /**
+     * Update item to not include an ingredient.
+     * @param menu_id ~
+     * @param inventory_id ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
     public boolean removeFromItem(int menu_id, int inventory_id) {
         boolean success = false;
         try {
