@@ -4,7 +4,11 @@ import java.util.Map;
 
 /*
         try {
-
+            String statement = "";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,6 +70,7 @@ import java.util.Map;
 public class Database {
     static Connection conn = null;
 
+    // TODO: close db
     static {
         try {
             // Class.forName("org.postgresql.Driver");
@@ -224,7 +229,29 @@ public class Database {
         return success;
     }
 
-    // TODO: menu_items add new item (takes- name, price)
+    /**
+     * Add a new item to menu items table.
+     * 
+     * @param name  ~
+     * @param price ~
+     * @return The new menu item id.
+     */
+    public int addMenuItem(String name, double price) {
+        int id = -1;
+        try {
+            String statement = "INSERT INTO menu_items (item_name, price) VALUES ("
+                    + name + ", " + price + ") RETURNING id";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                id = result.getInt(id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    // TODO: menu items add ingredients to item
     // TODO: menu_items delete item (takes- id)
 
     /**
