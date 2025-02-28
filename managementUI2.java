@@ -9,7 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-public class managementUI extends Application {
+public class managementUI2 extends Application {
     private VBox categoryContent;
 
     @Override
