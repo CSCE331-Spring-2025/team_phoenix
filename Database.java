@@ -405,7 +405,7 @@ public class Database {
     }
 
     // TODO: remove item from order (should be functional)
-    public boolean removeItemFromOrder(int order_id, int menu_id) {
+    public boolean removeFromOrder(int order_id, int menu_id) {
         boolean success = false;
         try {
             String statement = "DELETE FROM items_in_order WHERE order_id = " + order_id
@@ -436,7 +436,10 @@ public class Database {
     // return success;
     // }
 
-    // TODO: inventory item map () {name, id, quantity, supplierID}
+    // TODO: inventory item map () {name, id}
+    // TODO: inventory get supplier id
+    // TODO: inventory set supplier id
+    // TODO: inventory get quantity
 
     /**
      * Add {@code amount} to the current {@code quantity} in inventory table.
@@ -467,7 +470,7 @@ public class Database {
      * @param amount       The most current phyical count of the inventory item.
      * @return {@code boolean} wheather inventory was successfully updated.
      */
-    public boolean updateQuantity(int inventory_id, int amount) {
+    public boolean setQuantity(int inventory_id, int amount) {
         boolean success = false;
         try {
             String statement = "UPDATE inventory SET quantity = " + amount
@@ -483,9 +486,39 @@ public class Database {
     }
 
     // TODO: inventory add new item
+    public boolean addInventoryItem(String item_name, int supplier_id) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO inventory (item_name, supplier_id) VALUES ("
+                    + item_name + ", " + supplier_id + ")";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
     // TODO: inventory delete item
+    public boolean removeInventoryItem(int inventory_id) {
+        boolean success = false;
+        try {
+            String statement = "DELETE FROM inventory WHERE id = " + inventory_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
 
-    // TODO: employees map? {full name, is manager, pin(or null)}
+    // TODO: employees map {full name(string pair), id} 
+    // TODO: employees get is manager
+    // TODO: employees get pin or compare pin to id?
+
     // TODO: employees add new employee
     public boolean addEmployee(String first_name, String last_name) {
         boolean success = false;
