@@ -277,7 +277,8 @@ public class Database {
 
     /**
      * Update item to not include an ingredient.
-     * @param menu_id ~
+     * 
+     * @param menu_id      ~
      * @param inventory_id ~
      * @return {@code boolean} wheather inventory was successfully updated.
      */
@@ -403,6 +404,22 @@ public class Database {
         return subtotal;
     }
 
+    // TODO: remove item from order (should be functional)
+    public boolean removeItemFromOrder(int order_id, int menu_id) {
+        boolean success = false;
+        try {
+            String statement = "DELETE FROM items_in_order WHERE order_id = " + order_id
+                    + " AND menu_id = " + menu_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
     // public boolean subtractIngredient(int ingredient_id) {
     // boolean success = false;
     // try {
@@ -428,7 +445,7 @@ public class Database {
      * @param amount       To add to current quantity.
      * @return The updated quantity.
      */
-    public int addToInventory(int inventory_id, int amount) {
+    public int addToQuantity(int inventory_id, int amount) {
         int quantity = -1;
         try {
             String statement = "UPDATE inventory SET quantity = quantity + " + amount +
@@ -450,7 +467,7 @@ public class Database {
      * @param amount       The most current phyical count of the inventory item.
      * @return {@code boolean} wheather inventory was successfully updated.
      */
-    public boolean updateInventory(int inventory_id, int amount) {
+    public boolean updateQuantity(int inventory_id, int amount) {
         boolean success = false;
         try {
             String statement = "UPDATE inventory SET quantity = " + amount
@@ -465,6 +482,10 @@ public class Database {
         return success;
     }
 
+    // TODO: inventory add new item
+    // TODO: inventory delete item
+
+    // TODO: employees map? {full name, is manager, pin(or null)}
     // TODO: employees add new employee
     public boolean addEmployee(String first_name, String last_name) {
         boolean success = false;
