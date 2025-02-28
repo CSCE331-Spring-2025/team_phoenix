@@ -466,23 +466,96 @@ public class Database {
     }
 
     // TODO: employees add new employee
-    // TODO: employees update info
-    // TODO: employees change to is manager
-    // TODO: employees removes
+    public boolean addEmployee(String first_name, String last_name) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO employees (first_name, last_name) VALUES ("
+                    + first_name + ", " + last_name + ")";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
 
-    // public boolean addToOrder(int order_id, int menu_id) {
-    // boolean added = false;
-    // try {
-    // String statement = "INSERT INTO items_in_order (order_id, menu_id) VALUES ("
-    // + order_id + ", " + menu_id + ")";
-    // int x = update(statement);
-    // if (x > 0) {
-    // added = true;
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // return added;
-    // }
+    public boolean addManager(String first_name, String last_name, String pin) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES ('"
+                    + first_name + "', '" + last_name + "', 't', '" + pin + "')";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: employees update info
+    public boolean updateEmployeeFirstName(int employee_id, String new_first_name) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE employees SET first_name = " + new_first_name
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public boolean updateEmployeeLastName(int employee_id, String new_last_name) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE employees SET last_name = " + new_last_name
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: employees change to is manager
+    public boolean addManager(int employee_id, String pin) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE employees SET is_manager = 't'"
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: employees removes
+    public boolean removeEmployee(int employee_id) {
+        boolean success = false;
+        try {
+            String statement = "DELETE FROM employees WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
 
 }
