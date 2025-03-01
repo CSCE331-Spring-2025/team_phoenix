@@ -178,7 +178,7 @@ public class Database {
     /**
      * Pull all item names from menu items table.
      * 
-     * @return A {@code Map} containing all menu item id mapped to their
+     * @return A {@code Map} containing all menu item ids mapped to their
      *         respective names.
      */
     public Map<Integer, String> getMenuItemNames() {
@@ -352,7 +352,7 @@ public class Database {
     /**
      * Pull all supplier names from suppliers table.
      * 
-     * @return A {@code Map} containing all supplier id mapped to their
+     * @return A {@code Map} containing all supplier ids mapped to their
      *         respective names.
      */
     public Map<Integer, String> getSupplierNames() {
@@ -458,6 +458,12 @@ public class Database {
     }
 
     // TODO: inventory item map () {name, id}
+    /**
+     * Pull all item names from the inventory table.
+     * 
+     * @return A {@code Map} containing all inventory ids mapped to their
+     *         respective names.
+     */
     public Map<Integer, String> getInventoryNames() {
         Map<Integer, String> inventoryMap = new HashMap<>();
         try {
