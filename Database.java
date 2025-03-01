@@ -166,14 +166,16 @@ public class Database {
         return item_name;
     }
 
+    // TODO: amount of menu items
+
     /**
      * Pull all item names from menu items table.
      * 
-     * @return A {@code Map} containing all menu item names mapped to their
-     *         respective ids.
+     * @return A {@code Map} containing all menu item id mapped to their
+     *         respective names.
      */
-    public Map<String, Integer> getMenuItemNames() {
-        Map<String, Integer> menuMap = new HashMap<>();
+    public Map<Integer, String> getMenuItemNames() {
+        Map<Integer, String> menuMap = new HashMap<>();
         try {
             String statement = "SELECT * FROM menu_items";
             ResultSet result = select(statement);
@@ -181,7 +183,7 @@ public class Database {
                 int id = result.getInt("id");
                 String name = result.getString("item_name");
 
-                menuMap.put(name, id);
+                menuMap.put(id, name);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -241,8 +243,8 @@ public class Database {
     public int addMenuItem(String name, double price) {
         int id = -1;
         try {
-            String statement = "INSERT INTO menu_items (item_name, price) VALUES ("
-                    + name + ", " + price + ") RETURNING id";
+            String statement = "INSERT INTO menu_items (item_name, price) VALUES ('"
+                    + name + "', " + price + ") RETURNING id";
             ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt(id);
@@ -321,11 +323,11 @@ public class Database {
     /**
      * Pull all supplier names from suppliers table.
      * 
-     * @return A {@code Map} containing all supplier names mapped to their
-     *         respective ids.
+     * @return A {@code Map} containing all supplier id mapped to their
+     *         respective names.
      */
-    public Map<String, Integer> getSupplierNames() {
-        Map<String, Integer> supplierMap = new HashMap<>();
+    public Map<Integer, String> getSupplierNames() {
+        Map<Integer, String> supplierMap = new HashMap<>();
         try {
             String statement = "SELECT * FROM suppliers ORDER BY id ASC";
             ResultSet result = select(statement);
@@ -333,7 +335,7 @@ public class Database {
                 int id = result.getInt("id");
                 String name = result.getString("supplier_name");
 
-                supplierMap.put(name, id);
+                supplierMap.put(id, name);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -489,8 +491,8 @@ public class Database {
     public boolean addInventoryItem(String item_name, int supplier_id) {
         boolean success = false;
         try {
-            String statement = "INSERT INTO inventory (item_name, supplier_id) VALUES ("
-                    + item_name + ", " + supplier_id + ")";
+            String statement = "INSERT INTO inventory (item_name, supplier_id) VALUES ('"
+                    + item_name + "', " + supplier_id + ")";
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -500,6 +502,7 @@ public class Database {
         }
         return success;
     }
+
     // TODO: inventory delete item
     public boolean removeInventoryItem(int inventory_id) {
         boolean success = false;
@@ -515,47 +518,47 @@ public class Database {
         return success;
     }
 
-    // TODO: employees map {full name(string pair), id} 
+    // TODO: employees map {full name(string pair), id}
     // TODO: employees get is manager
-    // TODO: employees get pin or compare pin to id?
+    // TODO: employees compare pin to id (id,pin)
 
     // TODO: employees add new employee
-    public boolean addEmployee(String first_name, String last_name) {
-        boolean success = false;
+    public int addEmployee(String first_name, String last_name) {
+        int id = -1;
         try {
-            String statement = "INSERT INTO employees (first_name, last_name) VALUES ("
-                    + first_name + ", " + last_name + ")";
-            int result = update(statement);
-            if (result > 0) {
-                success = true;
+            String statement = "INSERT INTO employees (first_name, last_name) VALUES ('"
+                    + first_name + "', '" + last_name + "') RETURN id";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                id = result.getInt("id");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return success;
+        return id;
     }
 
-    public boolean addManager(String first_name, String last_name, String pin) {
-        boolean success = false;
+    public int addManager(String first_name, String last_name, String pin) {
+        int id = -1;
         try {
             String statement = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES ('"
-                    + first_name + "', '" + last_name + "', 't', '" + pin + "')";
-            int result = update(statement);
-            if (result > 0) {
-                success = true;
+                    + first_name + "', '" + last_name + "', 't', '" + pin + "') RETURNING id";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                id = result.getInt("id");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return success;
+        return id;
     }
 
     // TODO: employees update info
     public boolean updateEmployeeFirstName(int employee_id, String new_first_name) {
         boolean success = false;
         try {
-            String statement = "UPDATE employees SET first_name = " + new_first_name
-                    + " WHERE id = " + employee_id;
+            String statement = "UPDATE employees SET first_name = '" + new_first_name
+                    + "' WHERE id = " + employee_id;
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -569,8 +572,8 @@ public class Database {
     public boolean updateEmployeeLastName(int employee_id, String new_last_name) {
         boolean success = false;
         try {
-            String statement = "UPDATE employees SET last_name = " + new_last_name
-                    + " WHERE id = " + employee_id;
+            String statement = "UPDATE employees SET last_name = '" + new_last_name
+                    + "' WHERE id = " + employee_id;
             int result = update(statement);
             if (result > 0) {
                 success = true;
