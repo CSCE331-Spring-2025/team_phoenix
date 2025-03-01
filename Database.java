@@ -184,7 +184,7 @@ public class Database {
     public Map<Integer, String> getMenuItemNames() {
         Map<Integer, String> menuMap = new HashMap<>();
         try {
-            String statement = "SELECT * FROM menu_items";
+            String statement = "SELECT * FROM menu_items ORDER BY id ASC";
             ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
@@ -304,6 +304,28 @@ public class Database {
             e.printStackTrace();
         }
         return success;
+    }
+
+    /**
+     * Checks if a menu item is capable of being made. 
+     * (i.e., ingredients are in-stock and not removed)
+     * 
+     * @param menu_id The item to be checked.
+     * @return An {@code int} to represent a {@code boolean}. (1=true, 0=false, -1=error)
+     */
+    public int canBeMade(int menu_id){
+        int makable = -1;
+        try {
+            String statement = "UPDATE inventory SET quantity = quantity + " + menu_id + " RETURNING quantity";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                String makableString = result.getString("can_make_menu_item");
+                makable = (makableString.equals("t")) ? 1 : 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return makable;
     }
 
     /**
@@ -436,6 +458,23 @@ public class Database {
     }
 
     // TODO: inventory item map () {name, id}
+    public Map<Integer, String> getInventoryNames() {
+        Map<Integer, String> inventoryMap = new HashMap<>();
+        try {
+            String statement = "SELECT * FROM inventory ORDER BY id ASC";
+            ResultSet result = select(statement);
+            while (result.next()) {
+                int id = result.getInt("id");
+                String name = result.getString("item_name");
+
+                inventoryMap.put(id, name);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return inventoryMap;
+    }
+
     // TODO: inventory get supplier id
     // TODO: inventory set supplier id
     // TODO: inventory get quantity
@@ -515,7 +554,7 @@ public class Database {
     public boolean removeInventoryItem(int inventory_id) {
         boolean success = false;
         try {
-            String statement = "DELETE FROM inventory WHERE id = " + inventory_id;
+            String statement = "UPDATE inventory SET is_deleted = TRUE WHERE id = " + inventory_id;
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -564,7 +603,7 @@ public class Database {
         int id = -1;
         try {
             String statement = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES ('"
-                    + first_name + "', '" + last_name + "', 't', '" + pin + "') RETURNING id";
+                    + first_name + "', '" + last_name + "', TRUE, '" + pin + "') RETURNING id";
             ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt("id");
@@ -629,7 +668,7 @@ public class Database {
     public boolean addManager(int employee_id, String pin) {
         boolean success = false;
         try {
-            String statement = "UPDATE employees SET is_manager = 't'"
+            String statement = "UPDATE employees SET is_manager = TRUE"
                     + " WHERE id = " + employee_id;
             int result = update(statement);
             if (result > 0) {
