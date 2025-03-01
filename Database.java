@@ -33,6 +33,7 @@ import java.util.Map;
  * <li>{@link #createNewOrder(int)}
  * <li>{@link #addToOrder(int, int)}
  * <li>{@link #getOrderSubtotal(int)}
+ * <li>{@link #removeFromOrder(int, int)}
  * </ul>
  * 
  * <li>
@@ -51,8 +52,10 @@ import java.util.Map;
  * <li>
  * Inventory
  * <ul>
- * <li>{@link #addToInventory(int, int)}
- * <li>{@link #updateInventory(int, int)}
+ * <li>{@link #addToQuantity(int, int)}
+ * <li>{@link #setQuantity(int, int)}
+ * <li>{@link #addInventoryItem(String, int)}
+ * <li>{@link #removeInventoryItem(int)}
  * </ul>
  * 
  * <li>
@@ -66,6 +69,12 @@ import java.util.Map;
  * Employees
  * <ul>
  * <li>{@link }
+ * <li>{@link #addEmployee(String, String)}
+ * <li>{@link #addManager(String, String, String)}
+ * <li>{@link #addManager(int, String)}
+ * <li>{@link #removeEmployee(int)}
+ * <li>{@link #updateEmployeeFirstName(int, String)}
+ * <li>{@link #updateEmployeeLastName(int, String)}
  * </ul>
  * </ol>
  */
@@ -113,7 +122,7 @@ public class Database {
         return result;
     }
 
-    // public int currentOrderNumber() {
+    // int currentOrderNumber() {
     // int order_num = -1;
     // try {
     // ResultSet result = select("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
@@ -166,8 +175,6 @@ public class Database {
         return item_name;
     }
 
-    // TODO: amount of menu items
-
     /**
      * Pull all item names from menu items table.
      * 
@@ -196,7 +203,7 @@ public class Database {
      * 
      * @param item_id ~
      * @param newName ~
-     * @return {@code boolean} wheather inventory was successfully updated.
+     * @return {@code boolean} wheather item was successfully updated.
      */
     public boolean updateItemName(int item_id, String newName) {
         boolean success = false;
@@ -217,7 +224,7 @@ public class Database {
      * 
      * @param item_id  ~
      * @param newPrice ~
-     * @return {@code boolean} wheather inventory was successfully updated.
+     * @return {@code boolean} wheather item was successfully updated.
      */
     public boolean updateItemPrice(int item_id, double newPrice) {
         boolean success = false;
@@ -260,7 +267,7 @@ public class Database {
      * 
      * @param menu_id      ~
      * @param inventory_id ~
-     * @return {@code boolean} wheather inventory was successfully updated.
+     * @return {@code boolean} wheather item was successfully updated.
      */
     public boolean addIngredientsToItem(int menu_id, int inventory_id) {
         boolean success = false;
@@ -282,7 +289,7 @@ public class Database {
      * 
      * @param menu_id      ~
      * @param inventory_id ~
-     * @return {@code boolean} wheather inventory was successfully updated.
+     * @return {@code boolean} wheather item was successfully removed.
      */
     public boolean removeFromItem(int menu_id, int inventory_id) {
         boolean success = false;
@@ -348,7 +355,7 @@ public class Database {
      * 
      * @param order_id ~
      * @param menu_id  ~
-     * @return {@code boolean} wheather inventory was successfully updated.
+     * @return {@code boolean} wheather order was successfully updated.
      */
     public boolean addToOrder(int order_id, int menu_id) {
         boolean added = false;
@@ -406,7 +413,13 @@ public class Database {
         return subtotal;
     }
 
-    // TODO: remove item from order (should be functional)
+    /**
+     * Remove an item from the order.
+     * 
+     * @param order_id The order id.
+     * @param menu_id  The item id to be removed.
+     * @return {@code boolean} wheather order was successfully updated.
+     */
     public boolean removeFromOrder(int order_id, int menu_id) {
         boolean success = false;
         try {
@@ -421,22 +434,6 @@ public class Database {
         }
         return success;
     }
-
-    // public boolean subtractIngredient(int ingredient_id) {
-    // boolean success = false;
-    // try {
-    // String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = "
-    // + ingredient_id
-    // + " AND quantity > 0";
-    // int result = update(statement);
-    // if (result > 0) {
-    // success = true;
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // return success;
-    // }
 
     // TODO: inventory item map () {name, id}
     // TODO: inventory get supplier id
@@ -487,7 +484,13 @@ public class Database {
         return success;
     }
 
-    // TODO: inventory add new item
+    /**
+     * Add a new inventory item.
+     * 
+     * @param item_name   The name of the inventory item.
+     * @param supplier_id The id for the item's supplier
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
     public boolean addInventoryItem(String item_name, int supplier_id) {
         boolean success = false;
         try {
@@ -503,7 +506,12 @@ public class Database {
         return success;
     }
 
-    // TODO: inventory delete item
+    /**
+     * Remove an item from the inventory.
+     * 
+     * @param inventory_id The item's id to be removed.
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
     public boolean removeInventoryItem(int inventory_id) {
         boolean success = false;
         try {
@@ -522,7 +530,13 @@ public class Database {
     // TODO: employees get is manager
     // TODO: employees compare pin to id (id,pin)
 
-    // TODO: employees add new employee
+    /**
+     * Adds a new employee.
+     * 
+     * @param first_name The new employee's first name.
+     * @param last_name  The new employee's last name.
+     * @return The new employee id.
+     */
     public int addEmployee(String first_name, String last_name) {
         int id = -1;
         try {
@@ -538,6 +552,14 @@ public class Database {
         return id;
     }
 
+    /**
+     * Adds a new employee who is a manager.
+     * 
+     * @param first_name The new employee's first name.
+     * @param last_name  The new employee's last name.
+     * @param pin        The new employee's manager PIN.
+     * @return The new employee id.
+     */
     public int addManager(String first_name, String last_name, String pin) {
         int id = -1;
         try {
@@ -553,7 +575,13 @@ public class Database {
         return id;
     }
 
-    // TODO: employees update info
+    /**
+     * Update an employee's first name.
+     * 
+     * @param employee_id    The employee's id.
+     * @param new_first_name The employee's new first name.
+     * @return {@code boolean} wheather employee was successfully updated.
+     */
     public boolean updateEmployeeFirstName(int employee_id, String new_first_name) {
         boolean success = false;
         try {
@@ -569,6 +597,13 @@ public class Database {
         return success;
     }
 
+    /**
+     * Update an employee's last name.
+     * 
+     * @param employee_id   The employee's id.
+     * @param new_last_name The employee's new last name.
+     * @return {@code boolean} wheather employee was successfully updated.
+     */
     public boolean updateEmployeeLastName(int employee_id, String new_last_name) {
         boolean success = false;
         try {
@@ -584,7 +619,13 @@ public class Database {
         return success;
     }
 
-    // TODO: employees change to is manager
+    /**
+     * Promote an employee to manager status.
+     * 
+     * @param employee_id The employee's id.
+     * @param pin         The employee's new manager PIN.
+     * @return {@code boolean} wheather employee was successfully updated.
+     */
     public boolean addManager(int employee_id, String pin) {
         boolean success = false;
         try {
@@ -600,7 +641,12 @@ public class Database {
         return success;
     }
 
-    // TODO: employees removes
+    /**
+     * Remove an employee from the system.
+     * 
+     * @param employee_id The employee id.
+     * @return {@code boolean} wheather employee was successfully removed.
+     */
     public boolean removeEmployee(int employee_id) {
         boolean success = false;
         try {
