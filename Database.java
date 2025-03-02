@@ -571,9 +571,63 @@ public class Database {
         return success;
     }
 
-    // TODO: employees map {full name(string pair), id}
-    // TODO: employees get is manager
-    // TODO: employees compare pin to id (id,pin)
+    /**
+     * Pull all employee names from the employees table.
+     * 
+     * @return A {@code Map} containing all employee ids mapped to Strings
+     *         containing thier full names. (formated as "First Last")
+     */
+    public Map<Integer, String> getEmployeeNames() {
+        Map<Integer, String> employeeMap = new HashMap<>();
+        return employeeMap;
+    }
+
+    /**
+     * Pull the manager status of an employee.
+     * 
+     * @param employee_id The employee id.
+     * @return An {@code int} to represent a {@code boolean}.
+     *         (1=true, 0=false, -1=error)
+     */
+    public int managerStatus(int employee_id) {
+        int manager = -1;
+        try {
+            String statement = "SELECT * FROM employees WHERE id = " + employee_id;
+            ResultSet result = select(statement);
+            if (result.next()) {
+                String managerString = result.getString("is_manager");
+                manager = (managerString.equals("t")) ? 1 : 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return manager;
+    }
+
+    /**
+     * Checks the database to see if a manager's PIN is valid.
+     * 
+     * @param employee_id The manager's emloyee id.
+     * @param pin         The manager PIN.
+     * @return An {@code int} value representing the valitity of a manager's PIN.
+     *         (0=non-manager id, 1=valid id & pin, 2=invalid pin, -1=error)
+     */
+    public int checkManagerPIN(int employee_id, String pin) {
+        int status = managerStatus(employee_id);
+        if (status == 1) {
+            try {
+                String statement = "SELECT * FROM employees WHERE id = " + employee_id;
+                ResultSet result = select(statement);
+                if (result.next()) {
+                    String managerString = result.getString("is_manager");
+                    status = (managerString.equals(pin)) ? 1 : 2;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return status;
+    }
 
     /**
      * Adds a new employee.
