@@ -522,7 +522,25 @@ public class Database {
         return success;
     }
 
-    // TODO: inventory get quantity
+    /**
+     * Pulls the quantity of the inventory item.
+     * 
+     * @param inventory_id The inventory item id.
+     * @return The quantity as an {@code int}, -1 if id not found.
+     */
+    public int getItemQuantity(int inventory_id) {
+        int quantity = -1;
+        try {
+            String statement = "SELECT * FROM inventory WHERE id = " + inventory_id;
+            ResultSet result = select(statement);
+            if (result.next()) {
+                quantity = result.getInt("quantity");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return quantity;
+    }
 
     /**
      * Add {@code amount} to the current {@code quantity} in inventory table.
