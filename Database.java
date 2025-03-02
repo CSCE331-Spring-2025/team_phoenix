@@ -467,7 +467,7 @@ public class Database {
     public Map<Integer, String> getInventoryNames() {
         Map<Integer, String> inventoryMap = new HashMap<>();
         try {
-            String statement = "SELECT * FROM inventory ORDER BY id ASC";
+            String statement = "SELECT * FROM inventory WHERE is_deleted = false ORDER BY id ASC";
             ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
