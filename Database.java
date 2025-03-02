@@ -457,7 +457,6 @@ public class Database {
         return success;
     }
 
-    // TODO: inventory item map () {name, id}
     /**
      * Pull all item names from the inventory table.
      * 
@@ -481,7 +480,26 @@ public class Database {
         return inventoryMap;
     }
 
-    // TODO: inventory get supplier id
+    /**
+     * Pull the current supplier for an inventory item.
+     * 
+     * @param inventory_id The inventory item's id.
+     * @return The supplier's id.
+     */
+    public int getItemSupplier(int inventory_id) {
+        int supplier_id = -1;
+        try {
+            String statement = "SELECT * FROM inventory WHERE id = " + inventory_id;
+            ResultSet result = select(statement);
+            if (result.next()) {
+                supplier_id = result.getInt("supplier_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return supplier_id;
+    }
+
     // TODO: inventory set supplier id
     // TODO: inventory get quantity
 
