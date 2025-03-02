@@ -40,22 +40,28 @@ import java.util.Map;
  * Menu Items
  * <ul>
  * <li>{@link #getMenuItemNames()}
+ * <li>{@link #addMenuItem(String, double)}
  * <li>{@link #getItemName(int)}
  * <li>{@link #getItemPrice(int)}
+ * <li>{@link #canBeMade(int)}
  * <li>{@link #updateItemName(int, String)}
  * <li>{@link #updateItemPrice(int, double)}
- * <li>{@link #addMenuItem(String, double)}
  * <li>{@link #addIngredientsToItem(int, int)}
- * <li>{@link #removeFromItem(int, int)}
+ * <li>{@link #removeIngredientsFromItem(int, int)}
+ * <li>{@link #removeMenuItem(int)}
  * </ul>
  * 
  * <li>
  * Inventory
  * <ul>
- * <li>{@link #addToQuantity(int, int)}
- * <li>{@link #setQuantity(int, int)}
+ * <li>{@link #getInventoryNames()}
  * <li>{@link #addInventoryItem(String, int)}
  * <li>{@link #removeInventoryItem(int)}
+ * <li>{@link #getItemQuantity(int)}
+ * <li>{@link #setQuantity(int, int)}
+ * <li>{@link #addToQuantity(int, int)}
+ * <li>{@link #getItemSupplier(int)}
+ * <li>{@link #updateItemSupplier(int, int)}
  * </ul>
  * 
  * <li>
@@ -68,13 +74,15 @@ import java.util.Map;
  * <li>
  * Employees
  * <ul>
- * <li>{@link }
+ * <li>{@link #getEmployeeNames()}
  * <li>{@link #addEmployee(String, String)}
  * <li>{@link #addManager(String, String, String)}
  * <li>{@link #addManager(int, String)}
- * <li>{@link #removeEmployee(int)}
+ * <li>{@link #managerStatus(int)}
+ * <li>{@link #checkManagerPIN(int, String)}
  * <li>{@link #updateEmployeeFirstName(int, String)}
  * <li>{@link #updateEmployeeLastName(int, String)}
+ * <li>{@link #removeEmployee(int)}
  * </ul>
  * </ol>
  */
@@ -96,7 +104,7 @@ public class Database {
         } // end try catch
     }
 
-    public static void closeConnection() {
+    static void closeConnection() {
         if (conn != null) {
             try {
                 conn.close();
@@ -272,6 +280,27 @@ public class Database {
     }
 
     /**
+     * Removes an item from the menu.
+     * 
+     * @param menu_id The menu item id.
+     * @return {@code boolean} wheather item was successfully updated.
+     */
+    public boolean removeMenuItem(int menu_id) {
+        boolean success = false;
+        try {
+            String sql = "DELETE FROM menu_items WHERE menu_id = ?";
+            int result = update(sql, menu_id);
+
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    /**
      * Add an ingredient to a menu item.
      * 
      * @param menu_id      The menu item id.
@@ -300,7 +329,7 @@ public class Database {
      * @param inventory_id The ingredient item id.
      * @return {@code boolean} wheather item was successfully removed.
      */
-    public boolean removeFromItem(int menu_id, int inventory_id) {
+    public boolean removeIngredientsFromItem(int menu_id, int inventory_id) {
         boolean success = false;
         try {
             String sql = "DELETE FROM ingredients_in_item WHERE menu_id = ? AND inventory_id = ?";
