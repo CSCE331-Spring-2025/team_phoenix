@@ -80,3 +80,18 @@ random helpful queries
 -- resorts table by primary key if you made a bunch of changes
 -- (PSQL doesnt do this automatically)
 CLUSTER employees USING employees_pkey;
+
+
+-------- MILES --------
+
+-- Veiw all triggers
+SELECT * FROM triggers;
+
+/*  Items in orders joined with the orders table 
+    Shows orders in descnding order by order_id  */
+SELECT * FROM order_summary;
+
+-- See all items in a specific order
+SELECT * FROM order_summary WHERE order_id = 300;
+
+SELECT * FROM daily_sales;
