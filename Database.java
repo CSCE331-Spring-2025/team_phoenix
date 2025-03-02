@@ -500,7 +500,28 @@ public class Database {
         return supplier_id;
     }
 
-    // TODO: inventory set supplier id
+    /**
+     * Change an inventory item's supplier.
+     * 
+     * @param inventory_id The inventory item id.
+     * @param supplier_id  The supplier id
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean updateItemSupplier(int inventory_id, int new_supplier_id) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE inventory SET supplier_id = " + new_supplier_id
+                    + " WHERE id = " + inventory_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
     // TODO: inventory get quantity
 
     /**
