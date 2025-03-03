@@ -638,21 +638,21 @@ public class Database {
      * 
      * @param item_name   The name of the inventory item.
      * @param supplier_id The id for the item's supplier
-     * @return {@code boolean} wheather inventory was successfully updated.
+     * @return The new inventory id.
      */
-    public boolean addInventoryItem(String item_name, int supplier_id) {
-        boolean success = false;
+    public int addInventoryItem(String item_name, int supplier_id) {
+        int id = -1;
         try {
-            String sql = "INSERT INTO inventory (item_name, supplier_id) VALUES ('?', ?)";
-            int result = update(sql, item_name, supplier_id);
+            String sql = "INSERT INTO inventory (item_name, supplier_id) VALUES ('?', ?) RETURNING id";
+            ResultSet result = select(sql, item_name, supplier_id);
 
-            if (result > 0) {
-                success = true;
+            if (result.next()) {
+                id = (int) result.getObject("id");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return success;
+        return id;
     }
 
     /**
