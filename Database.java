@@ -85,6 +85,8 @@ import java.util.Map;
  * <li>{@link #removeEmployee(int)}
  * </ul>
  * </ol>
+ * 
+ * @author Miles Q. Ryder
  */
 public class Database {
     private static Connection conn = null;
