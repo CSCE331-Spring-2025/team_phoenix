@@ -119,34 +119,43 @@ public class Database {
     /**
      * For SQL quaries that return a table of data.
      * 
-     * @param sql    The SQL query.
-     * @param params A variable number of parameters to add to the SQL query.
+     * @param statement The query typed into the PSQL terminal.
      * @return {@code ResultSet} with the SQL query output.
      * @throws SQLException
      */
-    private ResultSet select(String sql, Object... params) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        for (int i = 0; i < params.length; i++) {
-            stmt.setObject(i + 1, params[i]);
-        }
-        return stmt.executeQuery();
+    private ResultSet select(String statement) throws SQLException {
+        Statement stmt = conn.createStatement();
+        // send statement to DBMS
+        ResultSet result = stmt.executeQuery(statement);
+        return result;
     }
 
     /**
      * For SQL queries that returns no data.
      * 
-     * @param sql    The SQL query.
-     * @param params A variable number of parameters to add to the SQL query.
+     * @param statement The query typed into the PSQL terminal.
      * @return {@code int} of the number of rows updated.
      * @throws SQLException
      */
-    private int update(String sql, Object... params) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        for (int i = 0; i < params.length; i++) {
-            stmt.setObject(i + 1, params[i]);
-        }
-        return stmt.executeUpdate();
+    private int update(String statement) throws SQLException {
+        Statement stmt = conn.createStatement();
+        // send statement to DBMS (throws SQLException)
+        int result = stmt.executeUpdate(statement);
+        return result;
     }
+
+    // int currentOrderNumber() {
+    // int order_num = -1;
+    // try {
+    // ResultSet result = select("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
+    // if (result != null && result.next()) {
+    // order_num = result.getInt("id");
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // return order_num;
+    // }
 
     /**
      * Pull an item's price from menu items table.
@@ -158,12 +167,10 @@ public class Database {
     public double getItemPrice(int item_id) {
         double price = -1.0;
         try {
-            String sql = "SELECT * FROM menu_items WHERE id = ?";
-            ResultSet result = select(sql, item_id);
-
-            if (result.next()) {
-                price = result.getDouble("price");
-            }
+            String statement = "SELECT * FROM menu_items WHERE id=" + item_id;
+            ResultSet result = select(statement);
+            result.next();
+            price = result.getDouble("price");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -180,12 +187,10 @@ public class Database {
     public String getItemName(int item_id) {
         String item_name = "";
         try {
-            String sql = "SELECT * FROM menu_items WHERE id = ?";
-            ResultSet result = select(sql, item_id);
-
-            if (result.next()) {
-                item_name = result.getString("item_name");
-            }
+            String statement = "SELECT * FROM menu_items WHERE id=" + item_id;
+            ResultSet result = select(statement);
+            result.next();
+            item_name = result.getString("item_name");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -201,9 +206,8 @@ public class Database {
     public Map<Integer, String> getMenuItemNames() {
         Map<Integer, String> menuMap = new HashMap<>();
         try {
-            String sql = "SELECT * FROM menu_items ORDER BY id ASC";
-            ResultSet result = select(sql);
-
+            String statement = "SELECT * FROM menu_items ORDER BY id ASC";
+            ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
                 String name = result.getString("item_name");
@@ -225,9 +229,8 @@ public class Database {
     public boolean updateItemName(int item_id, String newName) {
         boolean success = false;
         try {
-            String sql = "UPDATE menu_items SET item_name = '?' WHERE id = ?";
-            int result = update(sql, newName, item_id);
-
+            String statement = "UPDATE menu_items SET item_name = '" + newName + "' WHERE id = " + item_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -247,9 +250,8 @@ public class Database {
     public boolean updateItemPrice(int item_id, double newPrice) {
         boolean success = false;
         try {
-            String sql = "UPDATE menu_items SET price =  WHERE id = ";
-            int result = update(sql, newPrice, item_id);
-
+            String statement = "UPDATE menu_items SET price = " + newPrice + " WHERE id = " + item_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -269,9 +271,9 @@ public class Database {
     public int addMenuItem(String name, double price) {
         int id = -1;
         try {
-            String sql = "INSERT INTO menu_items (item_name, price) VALUES ('?', ?) RETURNING id";
-            ResultSet result = select(sql, name, price);
-
+            String statement = "INSERT INTO menu_items (item_name, price) VALUES ('"
+                    + name + "', " + price + ") RETURNING id";
+            ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt(id);
             }
@@ -290,8 +292,8 @@ public class Database {
     public boolean removeMenuItem(int menu_id) {
         boolean success = false;
         try {
-            String sql = "DELETE FROM menu_items WHERE menu_id = ?";
-            int result = update(sql, menu_id);
+            String sql = "DELETE FROM menu_items WHERE menu_id = " + menu_id;
+            int result = update(sql);
 
             if (result > 0) {
                 success = true;
@@ -312,9 +314,9 @@ public class Database {
     public boolean addIngredientsToItem(int menu_id, int inventory_id) {
         boolean success = false;
         try {
-            String sql = "INSERT INTO ingredients_in_item (menu_id, inventory_id) VALUES (?, ?)";
-            int result = update(sql, menu_id, inventory_id);
-
+            String statement = "INSERT INTO ingredients_in_item (menu_id, inventory_id) VALUES ("
+                    + menu_id + ", " + inventory_id + ")";
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -334,9 +336,9 @@ public class Database {
     public boolean removeIngredientsFromItem(int menu_id, int inventory_id) {
         boolean success = false;
         try {
-            String sql = "DELETE FROM ingredients_in_item WHERE menu_id = ? AND inventory_id = ?";
-            int result = update(sql, menu_id, inventory_id);
-
+            String statement = "DELETE FROM ingredients_in_item WHERE menu_id = " + menu_id
+                    + " AND inventory_id = " + inventory_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -357,9 +359,8 @@ public class Database {
     public int canBeMade(int menu_id) {
         int makable = -1;
         try {
-            String sql = "UPDATE inventory SET quantity = quantity + ? RETURNING quantity";
-            ResultSet result = select(sql, menu_id);
-
+            String statement = "UPDATE inventory SET quantity = quantity + " + menu_id + " RETURNING quantity";
+            ResultSet result = select(statement);
             if (result.next()) {
                 String makableString = result.getString("can_make_menu_item");
                 makable = (makableString.equals("t")) ? 1 : 0;
@@ -380,10 +381,9 @@ public class Database {
     public String getSupplierName(int supplier_id) {
         String name = "";
         try {
-            String sql = "SELECT * FROM suppliers WHERE id = ?";
-            ResultSet result = select(sql, supplier_id);
-
-            if (result.next()) {
+            String statement = "SELECT * FROM suppliers WHERE id=" + supplier_id;
+            ResultSet result = select(statement);
+            while (result.next()) {
                 name = result.getString("supplier_name");
             }
         } catch (Exception e) {
@@ -401,9 +401,8 @@ public class Database {
     public Map<Integer, String> getSupplierNames() {
         Map<Integer, String> supplierMap = new HashMap<>();
         try {
-            String sql = "SELECT * FROM suppliers ORDER BY id ASC";
-            ResultSet result = select(sql);
-
+            String statement = "SELECT * FROM suppliers ORDER BY id ASC";
+            ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
                 String name = result.getString("supplier_name");
@@ -425,9 +424,9 @@ public class Database {
     public boolean addToOrder(int order_id, int menu_id) {
         boolean added = false;
         try {
-            String sql = "INSERT INTO items_in_order (order_id, menu_id) VALUES (?, ?)";
-            int x = update(sql, order_id, menu_id);
-
+            String statement = "INSERT INTO items_in_order (order_id, menu_id) VALUES ("
+                    + order_id + ", " + menu_id + ")";
+            int x = update(statement);
             if (x > 0) {
                 added = true;
             }
@@ -446,9 +445,8 @@ public class Database {
     public int createNewOrder(int employee_id) {
         int orderID = -1;
         try {
-            String sql = "INSERT INTO orders (employee_id) VALUES (?) RETURNING id";
-            ResultSet result = select(sql, employee_id);
-
+            String statement = "INSERT INTO orders (employee_id) VALUES (" + employee_id + ") RETURNING id";
+            ResultSet result = select(statement);
             if (result.next()) {
                 orderID = result.getInt("id");
             }
@@ -468,8 +466,8 @@ public class Database {
     public double getOrderSubtotal(int order_id) {
         double subtotal = -1.0;
         try {
-            String sql = "SELECT * FROM orders WHERE id = ?";
-            ResultSet result = select(sql, order_id);
+            String statement = "SELECT * FROM orders WHERE id = " + order_id;
+            ResultSet result = select(statement);
             if (result.next()) {
                 subtotal = result.getDouble("total_cost");
             }
@@ -489,9 +487,9 @@ public class Database {
     public boolean removeFromOrder(int order_id, int menu_id) {
         boolean success = false;
         try {
-            String sql = "DELETE FROM items_in_order WHERE order_id = ? AND menu_id = ?";
-            int result = update(sql, order_id, menu_id);
-
+            String statement = "DELETE FROM items_in_order WHERE order_id = " + order_id
+                    + " AND menu_id = " + menu_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -510,9 +508,8 @@ public class Database {
     public Map<Integer, String> getInventoryNames() {
         Map<Integer, String> inventoryMap = new HashMap<>();
         try {
-            String sql = "SELECT * FROM inventory WHERE is_deleted = false ORDER BY id ASC";
-            ResultSet result = select(sql);
-
+            String statement = "SELECT * FROM inventory WHERE is_deleted = false ORDER BY id ASC";
+            ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
                 String name = result.getString("item_name");
@@ -534,9 +531,8 @@ public class Database {
     public int getItemSupplier(int inventory_id) {
         int supplier_id = -1;
         try {
-            String sql = "SELECT * FROM inventory WHERE id = ?";
-            ResultSet result = select(sql, inventory_id);
-
+            String statement = "SELECT * FROM inventory WHERE id = " + inventory_id;
+            ResultSet result = select(statement);
             if (result.next()) {
                 supplier_id = result.getInt("supplier_id");
             }
@@ -556,9 +552,9 @@ public class Database {
     public boolean updateItemSupplier(int inventory_id, int new_supplier_id) {
         boolean success = false;
         try {
-            String sql = "UPDATE inventory SET supplier_id = ? WHERE id = ?";
-            int result = update(sql, new_supplier_id, inventory_id);
-
+            String statement = "UPDATE inventory SET supplier_id = " + new_supplier_id
+                    + " WHERE id = " + inventory_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -577,9 +573,8 @@ public class Database {
     public int getItemQuantity(int inventory_id) {
         int quantity = -1;
         try {
-            String sql = "SELECT * FROM inventory WHERE id = ?";
-            ResultSet result = select(sql, inventory_id);
-
+            String statement = "SELECT * FROM inventory WHERE id = " + inventory_id;
+            ResultSet result = select(statement);
             if (result.next()) {
                 quantity = result.getInt("quantity");
             }
@@ -599,9 +594,9 @@ public class Database {
     public int addToQuantity(int inventory_id, int amount) {
         int quantity = -1;
         try {
-            String sql = "UPDATE inventory SET quantity = quantity + ? WHERE id = ? RETURNING quantity";
-            ResultSet result = select(sql, amount, inventory_id);
-
+            String statement = "UPDATE inventory SET quantity = quantity + " + amount +
+                    " WHERE id = " + inventory_id + " RETURNING quantity";
+            ResultSet result = select(statement);
             if (result.next()) {
                 quantity = result.getInt("quantity");
             }
@@ -621,9 +616,9 @@ public class Database {
     public boolean setQuantity(int inventory_id, int amount) {
         boolean success = false;
         try {
-            String sql = "UPDATE inventory SET quantity = ? WHERE id = ?";
-            int result = update(sql, amount, inventory_id);
-
+            String statement = "UPDATE inventory SET quantity = " + amount
+                    + " WHERE id = " + inventory_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -643,11 +638,11 @@ public class Database {
     public int addInventoryItem(String item_name, int supplier_id) {
         int id = -1;
         try {
-            String sql = "INSERT INTO inventory (item_name, supplier_id) VALUES ('?', ?) RETURNING id";
-            ResultSet result = select(sql, item_name, supplier_id);
-
+            String statement = "INSERT INTO inventory (item_name, supplier_id) VALUES ('"
+                    + item_name + "', " + supplier_id + ")";
+            ResultSet result = select(statement);
             if (result.next()) {
-                id = (int) result.getObject("id");
+                id = result.getInt("id");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -664,9 +659,8 @@ public class Database {
     public boolean removeInventoryItem(int inventory_id) {
         boolean success = false;
         try {
-            String sql = "UPDATE inventory SET is_deleted = TRUE WHERE id = ?";
-            int result = update(sql, inventory_id);
-
+            String statement = "UPDATE inventory SET is_deleted = TRUE WHERE id = " + inventory_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -712,9 +706,8 @@ public class Database {
     public int managerStatus(int employee_id) {
         int manager = -1;
         try {
-            String sql = "SELECT * FROM employees WHERE id = ?";
-            ResultSet result = select(sql, employee_id);
-
+            String statement = "SELECT * FROM employees WHERE id = " + employee_id;
+            ResultSet result = select(statement);
             if (result.next()) {
                 String managerString = result.getString("is_manager");
                 manager = (managerString.equals("t")) ? 1 : 0;
@@ -737,9 +730,8 @@ public class Database {
         int status = managerStatus(employee_id);
         if (status == 1) {
             try {
-                String sql = "SELECT * FROM employees WHERE id = ?";
-                ResultSet result = select(sql, employee_id);
-
+                String statement = "SELECT * FROM employees WHERE id = " + employee_id;
+                ResultSet result = select(statement);
                 if (result.next()) {
                     String managerString = result.getString("is_manager");
                     status = (managerString.equals(pin)) ? 1 : 2;
@@ -761,9 +753,9 @@ public class Database {
     public int addEmployee(String first_name, String last_name) {
         int id = -1;
         try {
-            String sql = "INSERT INTO employees (first_name, last_name) VALUES ('?', '?') RETURNING id";
-            ResultSet result = select(sql, first_name, last_name);
-
+            String statement = "INSERT INTO employees (first_name, last_name) VALUES ('"
+                    + first_name + "', '" + last_name + "') RETURN id";
+            ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt("id");
             }
@@ -784,9 +776,9 @@ public class Database {
     public int addManager(String first_name, String last_name, String pin) {
         int id = -1;
         try {
-            String sql = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES ('?', '?', TRUE, '?') RETURNING id";
-            ResultSet result = select(sql, first_name, last_name, pin);
-
+            String statement = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES ('"
+                    + first_name + "', '" + last_name + "', TRUE, '" + pin + "') RETURNING id";
+            ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt("id");
             }
@@ -806,9 +798,9 @@ public class Database {
     public boolean updateEmployeeFirstName(int employee_id, String new_first_name) {
         boolean success = false;
         try {
-            String sql = "UPDATE employees SET first_name = '?' WHERE id = ?";
-            int result = update(sql, new_first_name, employee_id);
-
+            String statement = "UPDATE employees SET first_name = '" + new_first_name
+                    + "' WHERE id = " + employee_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -828,9 +820,9 @@ public class Database {
     public boolean updateEmployeeLastName(int employee_id, String new_last_name) {
         boolean success = false;
         try {
-            String sql = "UPDATE employees SET last_name = '?' WHERE id = ?";
-            int result = update(sql, new_last_name, employee_id);
-
+            String statement = "UPDATE employees SET last_name = '" + new_last_name
+                    + "' WHERE id = " + employee_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -850,9 +842,9 @@ public class Database {
     public boolean addManager(int employee_id, String pin) {
         boolean success = false;
         try {
-            String sql = "UPDATE employees SET is_manager = TRUE, manager_pin = ? WHERE id = ?";
-            int result = update(sql, pin, employee_id);
-
+            String statement = "UPDATE employees SET is_manager = TRUE, manager_pin = " + pin
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
@@ -871,9 +863,8 @@ public class Database {
     public boolean removeEmployee(int employee_id) {
         boolean success = false;
         try {
-            String sql = "DELETE FROM employees WHERE id = ?";
-            int result = update(sql, employee_id);
-
+            String statement = "DELETE FROM employees WHERE id = " + employee_id;
+            int result = update(statement);
             if (result > 0) {
                 success = true;
             }
