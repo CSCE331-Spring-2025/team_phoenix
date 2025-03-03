@@ -6,6 +6,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -23,16 +24,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * Creates the cashier section of the POS application
+ * <p>
+ * Constructs a POS system for employee use.
+ *
+ * <p>
+ */
 public class POSApplication extends Application {
-    ArrayList<String> orderList = new ArrayList<>();
-    ArrayList<Integer> orderIDList = new ArrayList<>();
+    //ArrayList<Integer> orderIDList = new ArrayList<>();
 
-    HashMap<Integer, Integer> orderMap = new HashMap<>();
+    Map<Integer, Integer> orderMap = new HashMap<>();
 
     int orderNum;
 
     Database database = new Database();
 
+    Map<Integer, String> buttonNameMap = database.getMenuItemNames();
+
+    /**
+     * @author Dylan Nguyen
+     * @param stage
+     * @throws IOException
+     */
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -40,8 +54,16 @@ public class POSApplication extends Application {
         startOrder.setText("Start order");
         startOrder.setPrefSize(300, 50);
 
+        Text idInputLabel = new Text();
+        idInputLabel.setText("Please enter employee id:");
+        idInputLabel.setFont(Font.font("verdana", 20));
+
+        TextArea employeeIdInput = new TextArea();
+        employeeIdInput.setPrefSize(300, 20);
+        employeeIdInput.setFont(Font.font("verdana"));
+
         // first group
-        Group firstRoot = new Group(startOrder);
+        Group firstRoot = new Group(startOrder, idInputLabel, employeeIdInput);
 
         Scene firstScene = new Scene(firstRoot, 1080, 720);
 
@@ -58,8 +80,8 @@ public class POSApplication extends Application {
 
         // buttons
         ArrayList<Button> orderButtons = new ArrayList<>();
-        for(int i = 1; i <= 16; i++){
-            orderButtons.add(createButton(i));
+        for(Integer id : buttonNameMap.keySet()){
+            orderButtons.add(createButton(id));
         }
         Image button1Image = new Image("file:images/strawberry-lemonade-smoothie.jpg");
         ImageView button1ImageView = new ImageView(button1Image);
@@ -209,15 +231,26 @@ public class POSApplication extends Application {
         finishOrder.setText("Finish order");
         finishOrder.setPrefSize(300, 50);
 
+        Text checkoutTotal = new Text();
+        checkoutTotal.setFont(Font.font("verdana", 20));
+        checkoutTotal.setWrappingWidth(scene.getWidth());
+
         // checkout group
         Group checkoutRoot = new Group(bottomBar2,
                 backButton,
-                finishOrder);
+                finishOrder,
+                checkoutTotal);
         Scene checkoutScene = new Scene(checkoutRoot);
 
         //place components correctly
         startOrder.layoutXProperty().bind(scene.widthProperty().divide(2).subtract(startOrder.widthProperty().divide(2)));
         startOrder.layoutYProperty().bind(scene.heightProperty().divide(2).subtract(startOrder.heightProperty().divide(2)));
+
+        idInputLabel.layoutXProperty().bind(startOrder.layoutXProperty());
+        idInputLabel.layoutYProperty().bind(startOrder.layoutYProperty().add(100));
+
+        employeeIdInput.layoutXProperty().bind(startOrder.layoutXProperty());
+        employeeIdInput.layoutYProperty().bind(startOrder.layoutYProperty().add(120));
 
         bottomBar.layoutYProperty().bind(scene.heightProperty().subtract(bottomBar.heightProperty()));
         bottomBar.widthProperty().bind(scene.widthProperty());
@@ -248,11 +281,16 @@ public class POSApplication extends Application {
         finishOrder.layoutXProperty().bind(scene.widthProperty().subtract(checkout.widthProperty()));
         finishOrder.layoutYProperty().bind(scene.heightProperty().subtract(checkout.heightProperty()));
 
+        checkoutTotal.layoutXProperty().bind(scene.xProperty());
+        checkoutTotal.layoutYProperty().bind(scene.yProperty());
+
 
         startOrder.setOnAction(e -> {stage.setScene(scene);
-            orderNum = database.addOrder(1);
-            orderList.clear();
-            orderIDList.clear();
+            orderNum = database.createNewOrder(Integer.parseInt(employeeIdInput.getText()));
+            for(Integer key : orderMap.keySet()){
+                orderMap.put(key, 0);
+            }
+            //orderIDList.clear();
             subtotal.setText("Subtotal \n");});
 
         for(int i = 0; i < orderButtons.size(); i++){
@@ -265,45 +303,74 @@ public class POSApplication extends Application {
                 if(e.getButton() == MouseButton.PRIMARY){
                     //orderList.add(database.getItemName(temp+1));
                     orderMap.put(temp+1, orderMap.get(temp+1) + 1);
+                    database.addToOrder(orderNum, temp+1);
                     subtotal.setText("Subtotal \n" + mapToString(orderMap));
-                    orderIDList.add(temp+1);
+                    //orderIDList.add(temp+1);
                 }
                 if(e.getButton() == MouseButton.SECONDARY && orderMap.get(temp+1) > 0){
                     orderMap.put(temp+1, orderMap.get(temp+1) - 1);
+                    database.removeFromOrder(orderNum, temp+1);
                     subtotal.setText("Subtotal \n" + mapToString(orderMap));
-                    orderIDList.add(temp+1);
+                    //orderIDList.add(temp+1);
                 }
             });
         }
 
-        checkout.setOnAction(e -> {stage.setScene(checkoutScene);});
+        checkout.setOnAction(e -> {stage.setScene(checkoutScene);
+            checkoutTotal.setText("Total: \n" + mapToStringCheckout(orderMap));});
 
         backButton.setOnAction(e -> stage.setScene(scene));
-        finishOrder.setOnAction(e -> {addAllItems(orderIDList);
-            stage.setScene(firstScene);});
+        finishOrder.setOnAction(e -> {stage.setScene(firstScene);});
 
         stage.setTitle("GUI");
         stage.setScene(firstScene);
         stage.show();
     }
 
-    public String mapToString(HashMap<Integer, Integer> map){
+    /** covert the values of an Integer,Integer map to a string
+     *
+     * @author Dylan Nguyen
+     * @param map
+     * @return
+     */
+    private String mapToString(Map<Integer, Integer> map){
         String temp = "";
         for(int i = 0; i < map.size(); i++){
             if(map.get(i + 1) > 0){
-                temp = temp + database.getItemName(i + 1) + ": " + map.get(i + 1) + "\n";
+                temp = temp + "$" + (database.getItemPrice(i + 1) * map.get(i + 1)) + " - " + database.getItemName(i + 1) + ": " + map.get(i + 1) + "\n";
             }
         }
         return temp;
     }
 
-    public void addAllItems(List<Integer> list){
+    private String mapToStringCheckout(Map<Integer, Integer> map){
+        String temp = "";
+        for(int i = 0; i < map.size(); i++){
+            if(map.get(i + 1) > 0){
+                temp = temp + "$" + (database.getItemPrice(i + 1) * map.get(i + 1)) + " - " + map.get(i + 1) + "x " + database.getItemName(i + 1) + "\n";
+            }
+        }
+        return temp;
+    }
+
+    /** Add
+     *
+     * @author Dylan Nguyen
+     * @param list
+     */
+    private void addAllItems(List<Integer> list){
         for(int i = 0; i < list.size(); i++){
             database.addToOrder(orderNum, list.get(i));
         }
     }
 
-    public Button createButton(int idNum){
+    /**
+     *
+     * @author Dylan Nguyen
+     * @param idNum
+     * @return Button
+     */
+    private Button createButton(int idNum){
         Button button = new Button();
         button.setText(database.getItemName(idNum));
         button.setPrefSize(150, 150);
@@ -311,6 +378,7 @@ public class POSApplication extends Application {
 
         return button;
     }
+
     public static void main(String[] args) {
         launch();
     }
