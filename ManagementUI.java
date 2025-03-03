@@ -10,8 +10,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
-import java.beans.VetoableChangeListenerProxy;
+import management.Database;
+//import java.beans.VetoableChangeListenerProxy;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +19,8 @@ import java.util.Map;
 public class ManagementUI extends Application {
     private VBox categoryContent;
     private VBox employeeList;
+
+    Database database = new Database();
 
     @Override
     public void start(Stage primaryStage) {
@@ -305,10 +307,18 @@ public class ManagementUI extends Application {
         firstNameField.setPromptText("First Name");
         TextField lastNameField = new TextField();
         lastNameField.setPromptText("Last Name");
-        CheckBox isManagerCheckbox = new CheckBox("Is Manager?");
-        TextField managerPinField = new TextField();
-        managerPinField.setPromptText("Manager 4-digit PIN");
+        // CheckBox isManagerCheckbox = new CheckBox("Is Manager?");
+        // TextField managerPinField = new TextField();
+        // managerPinField.setPromptText("Manager 4-digit PIN");
         Button addEmployeeButton = new Button("Add Employee");
+
+        TextField mFirstNameField = new TextField();
+        mFirstNameField.setPromptText("First Name");
+        TextField mLastNameField = new TextField();
+        mLastNameField.setPromptText("Last Name");
+        TextField mPinField = new TextField();
+        mPinField.setPromptText("4-digit PIN");
+        Button addManagerButton = new Button("Add Manager");
 
         TextField employeeIdField = new TextField();
         employeeIdField.setPromptText("ID of employee that will be updated");
@@ -322,8 +332,13 @@ public class ManagementUI extends Application {
         Button updateEmployeeButton = new Button("Update Employee");
 
         addEmployeeButton.setOnAction(e -> {
-            addEmployee(firstNameField.getText(), lastNameField.getText(),
-                    isManagerCheckbox.isSelected(), managerPinField.getText());
+            database.addEmployee(firstNameField.getText(), lastNameField.getText());
+            // isManagerCheckbox.isSelected(), managerPinField.getText());
+            updateEmployeeList(); // Refresh UI
+        });
+
+        addManagerButton.setOnAction(e -> {
+            database.addManager(mFirstNameField.getText(), mLastNameField.getText(), mPinField.getText());
             updateEmployeeList(); // Refresh UI
         });
 
@@ -333,8 +348,9 @@ public class ManagementUI extends Application {
             updateEmployeeList(); // Refresh UI
         });
 
-        layout.getChildren().addAll(new Label("Add Employee:"), firstNameField, lastNameField, isManagerCheckbox,
-                managerPinField, addEmployeeButton, new Label("Update an Existing Employee: "), employeeIdField,
+        layout.getChildren().addAll(new Label("Add Employee:"), firstNameField, lastNameField, addEmployeeButton,
+                new Label("Add Manager:"), mFirstNameField, mLastNameField, mPinField, addManagerButton,
+                new Label("Update an Existing Employee: "), employeeIdField,
                 updateFirstNameField, updateLastNameField, updateIsManagerCheckbox, updateManagerPinField,
                 updateEmployeeButton,
                 new Label("Employees:"), employeeList);
@@ -345,25 +361,30 @@ public class ManagementUI extends Application {
     }
 
     // Adds a new employee to the database
-    private void addEmployee(String firstName, String lastName, boolean isManager, String managerPin) {
-        String insertQuery = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConnection.connect();
-                PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-
-            stmt.setString(1, firstName);
-            stmt.setString(2, lastName);
-            stmt.setBoolean(3, isManager);
-            stmt.setString(4, managerPin);
-
-            stmt.executeUpdate();
-            System.out.println("Added employee: " + firstName + " " + lastName);
-
-            updateEmployeeList(); // Refresh UI
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    /*
+     * private void addEmployee(String firstName, String lastName, boolean
+     * isManager, String managerPin) {
+     * String insertQuery =
+     * "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES (?, ?, ?, ?)"
+     * ;
+     * 
+     * try (Connection conn = DatabaseConnection.connect();
+     * PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+     * 
+     * stmt.setString(1, firstName);
+     * stmt.setString(2, lastName);
+     * stmt.setBoolean(3, isManager);
+     * stmt.setString(4, managerPin);
+     * 
+     * stmt.executeUpdate();
+     * System.out.println("Added employee: " + firstName + " " + lastName);
+     * 
+     * updateEmployeeList(); // Refresh UI
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * }
+     */
 
     private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName, boolean isManager) {
         String updateQuery = "UPDATE employees SET first_name = ?, last_name = ?, is_manager = ? WHERE id = ?";
@@ -448,13 +469,28 @@ public class ManagementUI extends Application {
         newItemPriceField.setPromptText("Price");
         Button addItemButton = new Button("Add Menu Item");
 
+        TextField itemIdField = new TextField();
+        itemIdField.setPromptText("ID of item whose name will be updated");
+        TextField updateItemNameField = new TextField();
+        updateItemNameField.setPromptText("Change existing item's name");
+        Button updateItemNameButton = new Button("Update Item Name");
+
         addItemButton.setOnAction(e -> {
             addMenuItem(newItemNameField.getText(), Double.parseDouble(newItemPriceField.getText()));
             createMenuSection(); // Refresh UI
         });
 
-        layout.getChildren().addAll(new Label("Add New Menu Item:"), newItemNameField, newItemPriceField,
-                addItemButton);
+        updateItemNameButton.setOnAction(e -> {
+            database.updateItemName(Integer.parseInt(itemIdField.getText()), updateItemNameField.getText());
+            createMenuSection(); // Refresh UI
+        });
+
+        // layout.getChildren().addAll(new Label("Add New Menu Item:"),
+        // newItemNameField, newItemPriceField,
+        // addItemButton);
+
+        layout.getChildren().addAll(new Label("Update an Existing Menu Item:"), itemIdField, updateItemNameField,
+                updateItemNameButton);
         return layout;
     }
 

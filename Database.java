@@ -1,19 +1,80 @@
+package management;
+
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
 /*
         try {
-
+            String statement = "";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 */
 
+/**
+ * Creates a connection to the team_phoenix database.
+ * <p>
+ * Hosts methods to run queries in the database without the user needing to know
+ * or use SQL commands.
+ * <p>
+ * 
+ * <p>
+ * ===========================
+ * TABLE OF CONTENTS
+ * ===========================
+ * <ol>
+ * <li>
+ * Orders
+ * <ul>
+ * <li>{@link #createNewOrder(int)}
+ * <li>{@link #addToOrder(int, int)}
+ * <li>{@link #getOrderSubtotal(int)}
+ * </ul>
+ * 
+ * <li>
+ * Menu Items
+ * <ul>
+ * <li>{@link #getMenuItemNames()}
+ * <li>{@link #getItemName(int)}
+ * <li>{@link #getItemPrice(int)}
+ * <li>{@link #updateItemName(int, String)}
+ * <li>{@link #updateItemPrice(int, double)}
+ * <li>{@link #addMenuItem(String, double)}
+ * <li>{@link #addIngredientsToItem(int, int)}
+ * <li>{@link #removeFromItem(int, int)}
+ * </ul>
+ * 
+ * <li>
+ * Inventory
+ * <ul>
+ * <li>{@link #addToInventory(int, int)}
+ * <li>{@link #updateInventory(int, int)}
+ * </ul>
+ * 
+ * <li>
+ * Suppliers
+ * <ul>
+ * <li>{@link #getSupplierNames()}
+ * <li>{@link #getSupplierName(int)}
+ * </ul>
+ * 
+ * <li>
+ * Employees
+ * <ul>
+ * <li>{@link }
+ * </ul>
+ * </ol>
+ */
 public class Database {
     static Connection conn = null;
 
+    // TODO: close db
     static {
         try {
             // Class.forName("org.postgresql.Driver");
@@ -26,14 +87,28 @@ public class Database {
         } // end try catch
     }
 
-    ResultSet select(String statement) throws SQLException {
+    /**
+     * For SQL quaries that return a table of data.
+     * 
+     * @param statement The query typed into the PSQL terminal.
+     * @return {@code RestultSet} with the SQL quary output.
+     * @throws SQLException
+     */
+    private ResultSet select(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
         // send statement to DBMS
         ResultSet result = stmt.executeQuery(statement);
         return result;
     }
 
-    int update(String statement) throws SQLException {
+    /**
+     * For SQL queries that returns no data.
+     * 
+     * @param statement The query typed into the PSQL terminal.
+     * @return {@code int} of the number of rows updated.
+     * @throws SQLException
+     */
+    private int update(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
         // send statement to DBMS (throws SQLException)
         int result = stmt.executeUpdate(statement);
@@ -45,7 +120,7 @@ public class Database {
     // try {
     // ResultSet result = select("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
     // if (result != null && result.next()) {
-    // order_num = result.getInt("id") + 1;
+    // order_num = result.getInt("id");
     // }
     // } catch (Exception e) {
     // e.printStackTrace();
@@ -53,6 +128,13 @@ public class Database {
     // return order_num;
     // }
 
+    /**
+     * Pull an item's price from menu items table.
+     * 
+     * @param item_id ~
+     * @return A {@code double} of the item's price or {@code -1} if item id not
+     *         found.
+     */
     public double getItemPrice(int item_id) {
         double price = -1.0;
         try {
@@ -66,6 +148,13 @@ public class Database {
         return price;
     }
 
+    /**
+     * Pull an item name from menu items table.
+     * 
+     * @param item_id ~
+     * @return A {@code String} of the item's name or empty {@code String} if item
+     *         id not found.
+     */
     public String getItemName(int item_id) {
         String item_name = "";
         try {
@@ -79,6 +168,12 @@ public class Database {
         return item_name;
     }
 
+    /**
+     * Pull all item names from menu items table.
+     * 
+     * @return A {@code Map} containing all menu item names mapped to their
+     *         respective ids.
+     */
     public Map<String, Integer> getMenuItemNames() {
         Map<String, Integer> menuMap = new HashMap<>();
         try {
@@ -96,6 +191,121 @@ public class Database {
         return menuMap;
     }
 
+    /**
+     * Change item name in menu items table.
+     * 
+     * @param item_id ~
+     * @param newName ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public void updateItemName(int item_id, String newName) { // sed to be boolean
+        // boolean success = false;
+        try {
+            String statement = "UPDATE menu_items SET item_name = '" + newName + "' WHERE id = " + item_id;
+            update(statement); // int result = ?
+            // if (result > 0) {
+            // success = true;
+            // }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // return success;
+    }
+
+    /**
+     * Change item price in menu items table.
+     * 
+     * @param item_id  ~
+     * @param newPrice ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean updateItemPrice(int item_id, double newPrice) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE menu_items SET price = " + newPrice + " WHERE id = " + item_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    /**
+     * Add a new item to menu items table.
+     * 
+     * @param name  ~
+     * @param price ~
+     * @return The new menu item id.
+     */
+    public int addMenuItem(String name, double price) {
+        int id = -1;
+        try {
+            String statement = "INSERT INTO menu_items (item_name, price) VALUES ("
+                    + name + ", " + price + ") RETURNING id";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                id = result.getInt(id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    /**
+     * Add an ingredient to a menu item.
+     * 
+     * @param menu_id      ~
+     * @param inventory_id ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean addIngredientsToItem(int menu_id, int inventory_id) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO ingredients_in_item (menu_id, inventory_id) VALUES ("
+                    + menu_id + ", " + inventory_id + ")";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    /**
+     * Update item to not include an ingredient.
+     * 
+     * @param menu_id      ~
+     * @param inventory_id ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean removeFromItem(int menu_id, int inventory_id) {
+        boolean success = false;
+        try {
+            String statement = "DELETE FROM ingredients_in_item WHERE menu_id = " + menu_id
+                    + " AND inventory_id = " + inventory_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    /**
+     * Pull a supplier's name from suppliers table.
+     * 
+     * @param supplier_id ~
+     * @return A {@code String} of the supplier's name or empty string if id not
+     *         found.
+     */
     public String getSupplierName(int supplier_id) {
         String name = "";
         try {
@@ -110,10 +320,16 @@ public class Database {
         return name;
     }
 
+    /**
+     * Pull all supplier names from suppliers table.
+     * 
+     * @return A {@code Map} containing all supplier names mapped to their
+     *         respective ids.
+     */
     public Map<String, Integer> getSupplierNames() {
         Map<String, Integer> supplierMap = new HashMap<>();
         try {
-            String statement = "SELECT * FROM suppliers";
+            String statement = "SELECT * FROM suppliers ORDER BY id ASC";
             ResultSet result = select(statement);
             while (result.next()) {
                 int id = result.getInt("id");
@@ -127,6 +343,13 @@ public class Database {
         return supplierMap;
     }
 
+    /**
+     * Add item to the order.
+     * 
+     * @param order_id ~
+     * @param menu_id  ~
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
     public boolean addToOrder(int order_id, int menu_id) {
         boolean added = false;
         try {
@@ -142,13 +365,19 @@ public class Database {
         return added;
     }
 
-    public int addOrder(int employee_id) {
+    /**
+     * Creates a new empty order in orders table.
+     * 
+     * @param employee_id The current cashier on till.
+     * @return The order number for the new order.
+     */
+    public int createNewOrder(int employee_id) {
         int orderID = -1;
         try {
             String statement = "INSERT INTO orders (employee_id) VALUES (" + employee_id + ") RETURNING id";
-            ResultSet x = select(statement);
-            if (x.next()) {
-                orderID = x.getInt("id");
+            ResultSet result = select(statement);
+            if (result.next()) {
+                orderID = result.getInt("id");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,10 +385,33 @@ public class Database {
         return orderID;
     }
 
-    public boolean subtractIngredient(int ingredient_id) {
+    /**
+     * Pull the current subtotal to the order from orders table.
+     * 
+     * @param order_id ~
+     * @return {@code double} The current order subtotal or {@code -1} if id not
+     *         found.
+     */
+    public double getOrderSubtotal(int order_id) {
+        double subtotal = -1.0;
+        try {
+            String statement = "SELECT * FROM orders WHERE id = " + order_id;
+            ResultSet result = select(statement);
+            if (result.next()) {
+                subtotal = result.getDouble("total_cost");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return subtotal;
+    }
+
+    // TODO: remove item from order (should be functional)
+    public boolean removeFromOrder(int order_id, int menu_id) {
         boolean success = false;
         try {
-            String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = " + ingredient_id + " AND quantity > 0";
+            String statement = "DELETE FROM items_in_order WHERE order_id = " + order_id
+                    + " AND menu_id = " + menu_id;
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -170,11 +422,61 @@ public class Database {
         return success;
     }
 
+    // public boolean subtractIngredient(int ingredient_id) {
+    // boolean success = false;
+    // try {
+    // String statement = "UPDATE inventory SET quantity = quantity - 1 WHERE id = "
+    // + ingredient_id
+    // + " AND quantity > 0";
+    // int result = update(statement);
+    // if (result > 0) {
+    // success = true;
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // return success;
+    // }
 
-    public boolean updateItemName(int item_id, String newName) {
+    // TODO: inventory item map () {name, id}
+    // TODO: inventory get supplier id
+    // TODO: inventory set supplier id
+    // TODO: inventory get quantity
+
+    /**
+     * Add {@code amount} to the current {@code quantity} in inventory table.
+     * 
+     * @param inventory_id ~
+     * @param amount       To add to current quantity.
+     * @return The updated quantity.
+     */
+    public int addToQuantity(int inventory_id, int amount) {
+        int quantity = -1;
+        try {
+            String statement = "UPDATE inventory SET quantity = quantity + " + amount +
+                    " WHERE id = " + inventory_id + " RETURNING quantity";
+            ResultSet result = select(statement);
+            if (result.next()) {
+                quantity = result.getInt("quantity");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return quantity;
+    }
+
+    /**
+     * Update the {@code quantity} in inventory table.
+     * 
+     * @param inventory_id ~
+     * @param amount       The most current phyical count of the inventory item.
+     * @return {@code boolean} wheather inventory was successfully updated.
+     */
+    public boolean setQuantity(int inventory_id, int amount) {
         boolean success = false;
         try {
-            String statement = "UPDATE menu_items SET item_name = '" + newName + "' WHERE id = " + item_id;
+            String statement = "UPDATE inventory SET quantity = " + amount
+                    + " WHERE id = " + inventory_id;
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -184,11 +486,13 @@ public class Database {
         }
         return success;
     }
-    
-    public boolean updateItemPrice(int item_id, double newPrice) {
+
+    // TODO: inventory add new item
+    public boolean addInventoryItem(String item_name, int supplier_id) {
         boolean success = false;
         try {
-            String statement = "UPDATE menu_items SET price = " + newPrice + " WHERE id = " + item_id;
+            String statement = "INSERT INTO inventory (item_name, supplier_id) VALUES ("
+                    + item_name + ", " + supplier_id + ")";
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -198,11 +502,12 @@ public class Database {
         }
         return success;
     }
-    
-    public boolean addMenuItem(String name, double price) {
+
+    // TODO: inventory delete item
+    public boolean removeInventoryItem(int inventory_id) {
         boolean success = false;
         try {
-            String statement = "INSERT INTO menu_items (item_name, price) VALUES ('" + name + "', " + price + ")";
+            String statement = "DELETE FROM inventory WHERE id = " + inventory_id;
             int result = update(statement);
             if (result > 0) {
                 success = true;
@@ -212,8 +517,102 @@ public class Database {
         }
         return success;
     }
-    
+
+    // TODO: employees map {full name(string pair), id}
+    // TODO: employees get is manager
+    // TODO: employees get pin or compare pin to id?
+
+    // TODO: employees add new employee
+    public boolean addEmployee(String first_name, String last_name) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO employees (first_name, last_name) VALUES ("
+                    + first_name + ", " + last_name + ")";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public boolean addManager(String first_name, String last_name, String pin) {
+        boolean success = false;
+        try {
+            String statement = "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES ('"
+                    + first_name + "', '" + last_name + "', 't', '" + pin + "')";
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: employees update info
+    public boolean updateEmployeeFirstName(int employee_id, String new_first_name) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE employees SET first_name = " + new_first_name
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public boolean updateEmployeeLastName(int employee_id, String new_last_name) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE employees SET last_name = " + new_last_name
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: employees change to is manager
+    public boolean addManager(int employee_id, String pin) {
+        boolean success = false;
+        try {
+            String statement = "UPDATE employees SET is_manager = 't'"
+                    + " WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    // TODO: employees removes
+    public boolean removeEmployee(int employee_id) {
+        boolean success = false;
+        try {
+            String statement = "DELETE FROM employees WHERE id = " + employee_id;
+            int result = update(statement);
+            if (result > 0) {
+                success = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
 }
-
-
-
