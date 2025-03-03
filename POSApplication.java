@@ -25,11 +25,7 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Creates the cashier section of the POS application
- * <p>
- * Constructs a POS system for employee use.
- *
- * <p>
+ * Creates the cashier section of the POS system.
  */
 public class POSApplication extends Application {
     //ArrayList<Integer> orderIDList = new ArrayList<>();
@@ -327,7 +323,7 @@ public class POSApplication extends Application {
         stage.show();
     }
 
-    /** covert the values of an Integer,Integer map to a string
+    /** Convert the map containing orders to the text in the subtotal area
      *
      * @author Dylan Nguyen
      * @param map
@@ -343,6 +339,12 @@ public class POSApplication extends Application {
         return temp;
     }
 
+    /** Convert the map containing orders to the text in the checkout area
+     *
+     * @author Dylan Nguyen
+     * @param map
+     * @return
+     */
     private String mapToStringCheckout(Map<Integer, Integer> map){
         String temp = "";
         for(int i = 0; i < map.size(); i++){
@@ -353,18 +355,7 @@ public class POSApplication extends Application {
         return temp;
     }
 
-    /** Add
-     *
-     * @author Dylan Nguyen
-     * @param list
-     */
-    private void addAllItems(List<Integer> list){
-        for(int i = 0; i < list.size(); i++){
-            database.addToOrder(orderNum, list.get(i));
-        }
-    }
-
-    /**
+    /** Create all necessary buttons
      *
      * @author Dylan Nguyen
      * @param idNum
