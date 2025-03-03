@@ -761,7 +761,7 @@ public class Database {
     public int addEmployee(String first_name, String last_name) {
         int id = -1;
         try {
-            String sql = "INSERT INTO employees (first_name, last_name) VALUES ('?', '?') RETURN id";
+            String sql = "INSERT INTO employees (first_name, last_name) VALUES ('?', '?') RETURNING id";
             ResultSet result = select(sql, first_name, last_name);
 
             if (result.next()) {
