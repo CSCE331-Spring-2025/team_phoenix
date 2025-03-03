@@ -6,18 +6,18 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.awt.event.ActionEvent;
 import java.beans.EventHandler;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -74,11 +74,14 @@ public class POSApplication extends Application {
         subtotalBar.setWidth(300);
         subtotalBar.setFill(Color.GRAY);
 
+        Group buttonPane = new Group();
+
         // buttons
         ArrayList<Button> orderButtons = new ArrayList<>();
         for(Integer id : buttonNameMap.keySet()){
             orderButtons.add(createButton(id));
         }
+
         Image button1Image = new Image("file:images/strawberry-lemonade-smoothie.jpg");
         ImageView button1ImageView = new ImageView(button1Image);
         button1ImageView.setPreserveRatio(true);
@@ -206,11 +209,16 @@ public class POSApplication extends Application {
                 subtotal,
                 checkout);
 
-        for(int i = 0; i < orderButtons.size(); i++){
-            if(database.getItemName(i+1) != ""){
-                root.getChildren().add(orderButtons.get(i));
+        for(int i = 0; i < orderButtons.size(); i++) {
+            if (database.getItemName(i + 1) != "") {
+                buttonPane.getChildren().add(orderButtons.get(i));
             }
         }
+
+        ScrollPane scrollPane = new ScrollPane(buttonPane);
+        scrollPane.setPrefSize(625, 600);
+
+        root.getChildren().add(scrollPane);
 
         Scene scene = new Scene(root, 1080, 720);
 
@@ -254,10 +262,13 @@ public class POSApplication extends Application {
         subtotalBar.layoutXProperty().bind(scene.widthProperty().subtract(subtotalBar.widthProperty()));
         subtotalBar.heightProperty().bind(scene.heightProperty());
 
+        scrollPane.layoutXProperty().bind(scene.xProperty().add(20));
+        scrollPane.layoutYProperty().bind(scene.yProperty());
+
 
         for(int i = 0; i < orderButtons.size(); i++){
-            orderButtons.get(i).layoutXProperty().bind(scene.xProperty().add(20 + (150 * (i % 4))));
-            orderButtons.get(i).layoutYProperty().bind(scene.yProperty().add(150 * (i / 4)));
+            orderButtons.get(i).layoutXProperty().bind(buttonPane.layoutXProperty().add((150 * (i % 4))));
+            orderButtons.get(i).layoutYProperty().bind(buttonPane.layoutYProperty().add(150 * (i / 4)));
         }
 
         subtotal.layoutXProperty().bind(scene.widthProperty().subtract(subtotalBar.widthProperty()).add(10));
