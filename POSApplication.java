@@ -28,15 +28,10 @@ import java.util.*;
  * Creates the cashier section of the POS system.
  */
 public class POSApplication extends Application {
-    //ArrayList<Integer> orderIDList = new ArrayList<>();
-
-    Map<Integer, Integer> orderMap = new HashMap<>();
-
-    int orderNum;
-
+    Map<Integer, Integer> orderMap = new HashMap<>(); // A map containing the current order in the form: <id of a product, amount of the product in the order>
+    int orderNum; // The id of the current order
     Database database = new Database();
-
-    Map<Integer, String> buttonNameMap = database.getMenuItemNames();
+    Map<Integer, String> buttonNameMap = database.getMenuItemNames(); // The map of every menu item in the form <id of a product, name of the product>
 
     /**
      * @author Dylan Nguyen
@@ -46,37 +41,70 @@ public class POSApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
+        /* This part is where all the components for the GUI are initialized.
+        *
+         */
+
+        /* These are the components for the first screen
+        *
+         */
+        Rectangle background = new Rectangle();
+        background.setWidth(1080);
+        background.setHeight(720);
+        background.setFill(Color.PEACHPUFF);
+
+        Rectangle decoration1 = new Rectangle();
+        decoration1.setWidth(400);
+        decoration1.setFill(Color.SADDLEBROWN);
+
+        Rectangle decoration2 = new Rectangle();
+        decoration2.setWidth(100);
+        decoration2.setFill(Color.SANDYBROWN);
+
+        Rectangle decoration3 = new Rectangle();
+        decoration3.setWidth(100);
+        decoration3.setFill(Color.SANDYBROWN);
+
         Button startOrder = new Button();
         startOrder.setText("Start order");
         startOrder.setPrefSize(300, 50);
 
+        Button goToLogin = new Button();
+        goToLogin.setText("Manager Login");
+        goToLogin.setPrefSize(300, 50);
+
         Text idInputLabel = new Text();
-        idInputLabel.setText("Please enter employee id:");
+        idInputLabel.setText("Please enter your ID:");
         idInputLabel.setFont(Font.font("verdana", 20));
 
         TextArea employeeIdInput = new TextArea();
         employeeIdInput.setPrefSize(300, 20);
         employeeIdInput.setFont(Font.font("verdana"));
 
-        // first group
-        Group firstRoot = new Group(startOrder, idInputLabel, employeeIdInput);
+        Group firstRoot = new Group(background, decoration2, decoration3, decoration1, startOrder, goToLogin, idInputLabel, employeeIdInput);
 
         Scene firstScene = new Scene(firstRoot, 1080, 720);
 
+        /* These are the components for the second screen
+        *
+         */
+        Rectangle background2 = new Rectangle();
+        background2.setWidth(1080);
+        background2.setHeight(720);
+        background2.setFill(Color.PEACHPUFF);
 
         Rectangle bottomBar = new Rectangle();
         bottomBar.setX(0);
         bottomBar.setHeight(50);
-        bottomBar.setFill(Color.LIGHTGRAY);
+        bottomBar.setFill(Color.SADDLEBROWN);
 
         Rectangle subtotalBar = new Rectangle();
         subtotalBar.setY(0);
         subtotalBar.setWidth(300);
-        subtotalBar.setFill(Color.GRAY);
+        subtotalBar.setFill(Color.SANDYBROWN);
 
         Group buttonPane = new Group();
 
-        // buttons
         ArrayList<Button> orderButtons = new ArrayList<>();
         for(Integer id : buttonNameMap.keySet()){
             orderButtons.add(createButton(id));
@@ -198,13 +226,12 @@ public class POSApplication extends Application {
         checkout.setText("Checkout");
         checkout.setPrefSize(300, 50);
 
-        // Subtotal text
         Text subtotal = new Text();
         subtotal.setFont(Font.font("verdana", 20));
         subtotal.setWrappingWidth(subtotalBar.getWidth() - 10);
 
-        // middle group
-        Group root = new Group(bottomBar,
+        Group orderingRoot = new Group(background2,
+                bottomBar,
                 subtotalBar,
                 subtotal,
                 checkout);
@@ -218,14 +245,26 @@ public class POSApplication extends Application {
         ScrollPane scrollPane = new ScrollPane(buttonPane);
         scrollPane.setPrefSize(625, 600);
 
-        root.getChildren().add(scrollPane);
+        orderingRoot.getChildren().add(scrollPane);
 
-        Scene scene = new Scene(root, 1080, 720);
+        Scene orderingScene = new Scene(orderingRoot);
+
+        /* These are the components for the third page.
+        *
+         */
+        Rectangle background3 = new Rectangle();
+        background3.setWidth(1080);
+        background3.setHeight(720);
+        background3.setFill(Color.PEACHPUFF);
+
+        Rectangle decoration4 = new Rectangle();
+        decoration4.setWidth(500);
+        decoration4.setFill(Color.SANDYBROWN);
 
         Rectangle bottomBar2 = new Rectangle();
         bottomBar2.setX(0);
         bottomBar2.setHeight(50);
-        bottomBar2.setFill(Color.LIGHTGRAY);
+        bottomBar2.setFill(Color.SADDLEBROWN);
 
         Button backButton = new Button();
         backButton.setText("Back");
@@ -237,18 +276,62 @@ public class POSApplication extends Application {
 
         Text checkoutTotal = new Text();
         checkoutTotal.setFont(Font.font("verdana", 20));
-        checkoutTotal.setWrappingWidth(scene.getWidth());
+        checkoutTotal.setWrappingWidth(600);
 
-        // checkout group
-        Group checkoutRoot = new Group(bottomBar2,
+        Group checkoutRoot = new Group(background3,
+                decoration4,
+                bottomBar2,
                 backButton,
                 finishOrder,
                 checkoutTotal);
-        Scene checkoutScene = new Scene(checkoutRoot);
+        Scene checkoutScene = new Scene(checkoutRoot, 1080, 720);
 
-        //place components correctly
-        startOrder.layoutXProperty().bind(scene.widthProperty().divide(2).subtract(startOrder.widthProperty().divide(2)));
-        startOrder.layoutYProperty().bind(scene.heightProperty().divide(2).subtract(startOrder.heightProperty().divide(2)));
+        /* These are the components for the manager login page
+        *
+         */
+        Button login = new Button();
+        login.setText("Login");
+        login.setPrefSize(300, 50);
+
+        Button backToStart = new Button();
+        backToStart.setText("Back");
+        backToStart.setPrefSize(300, 50);
+
+        Text managerIdInputLabel = new Text();
+        managerIdInputLabel.setText("Please enter your ID:");
+        managerIdInputLabel.setFont(Font.font("verdana", 20));
+
+        TextArea managerIdInput = new TextArea();
+        managerIdInput.setPrefSize(300, 20);
+        managerIdInput.setFont(Font.font("verdana"));
+
+        Text managerPinInputLabel = new Text();
+        managerPinInputLabel.setText("Please enter your manager PIN:");
+        managerPinInputLabel.setFont(Font.font("verdana", 20));
+
+        TextArea managerPinInput = new TextArea();
+        managerPinInput.setPrefSize(300, 20);
+        managerPinInput.setFont(Font.font("verdana"));
+
+        Group loginRoot = new Group(login,
+                backToStart,
+                managerIdInputLabel,
+                managerIdInput,
+                managerPinInputLabel,
+                managerPinInput);
+
+        Scene loginScene = new Scene(loginRoot, 1080, 720);
+
+        /* This part is where all the components get placed correctly.
+        * Order is similar to how the components were initialized.
+        *
+        *
+        * */
+        startOrder.layoutXProperty().bind(firstScene.widthProperty().divide(2).subtract(startOrder.widthProperty().divide(2)));
+        startOrder.layoutYProperty().bind(firstScene.heightProperty().divide(2).subtract(startOrder.heightProperty().divide(2)));
+
+        goToLogin.layoutXProperty().bind(startOrder.layoutXProperty());
+        goToLogin.layoutYProperty().bind(startOrder.layoutYProperty().subtract(100));
 
         idInputLabel.layoutXProperty().bind(startOrder.layoutXProperty());
         idInputLabel.layoutYProperty().bind(startOrder.layoutYProperty().add(100));
@@ -256,49 +339,100 @@ public class POSApplication extends Application {
         employeeIdInput.layoutXProperty().bind(startOrder.layoutXProperty());
         employeeIdInput.layoutYProperty().bind(startOrder.layoutYProperty().add(120));
 
-        bottomBar.layoutYProperty().bind(scene.heightProperty().subtract(bottomBar.heightProperty()));
-        bottomBar.widthProperty().bind(scene.widthProperty());
+        background.layoutXProperty().bind(firstScene.widthProperty().subtract(firstScene.widthProperty()));
+        background.layoutYProperty().bind(firstScene.heightProperty().subtract(firstScene.heightProperty()));
+        background.heightProperty().bind(firstScene.heightProperty());
+        background.widthProperty().bind(firstScene.widthProperty());
 
-        subtotalBar.layoutXProperty().bind(scene.widthProperty().subtract(subtotalBar.widthProperty()));
-        subtotalBar.heightProperty().bind(scene.heightProperty());
+        decoration1.layoutXProperty().bind(startOrder.layoutXProperty().subtract(50));
+        decoration1.layoutYProperty().bind(firstScene.heightProperty().subtract(firstScene.heightProperty()));
+        decoration1.heightProperty().bind(firstScene.heightProperty());
 
-        scrollPane.layoutXProperty().bind(scene.xProperty().add(20));
-        scrollPane.layoutYProperty().bind(scene.yProperty());
+        decoration2.layoutXProperty().bind(decoration1.layoutXProperty().subtract(100));
+        decoration2.layoutYProperty().bind(firstScene.heightProperty().subtract(firstScene.heightProperty()));
+        decoration2.heightProperty().bind(firstScene.heightProperty());
 
+        decoration3.layoutXProperty().bind(decoration1.layoutXProperty().add(decoration1.widthProperty()));
+        decoration3.layoutYProperty().bind(firstScene.heightProperty().subtract(firstScene.heightProperty()));
+        decoration3.heightProperty().bind(firstScene.heightProperty());
+
+        background2.layoutXProperty().bind(orderingScene.widthProperty().subtract(orderingScene.widthProperty()));
+        background2.layoutYProperty().bind(orderingScene.heightProperty().subtract(orderingScene.heightProperty()));
+        background2.heightProperty().bind(orderingScene.heightProperty());
+        background2.widthProperty().bind(orderingScene.widthProperty());
+
+        bottomBar.layoutYProperty().bind(orderingScene.heightProperty().subtract(bottomBar.heightProperty()));
+        bottomBar.widthProperty().bind(orderingScene.widthProperty());
+
+        subtotalBar.layoutXProperty().bind(orderingScene.widthProperty().subtract(subtotalBar.widthProperty()));
+        subtotalBar.heightProperty().bind(orderingScene.heightProperty());
+
+        scrollPane.layoutXProperty().bind(orderingScene.xProperty());
+        scrollPane.layoutYProperty().bind(orderingScene.yProperty());
 
         for(int i = 0; i < orderButtons.size(); i++){
-            orderButtons.get(i).layoutXProperty().bind(buttonPane.layoutXProperty().add((150 * (i % 4))));
-            orderButtons.get(i).layoutYProperty().bind(buttonPane.layoutYProperty().add(150 * (i / 4)));
+            orderButtons.get(i).layoutXProperty().bind(scrollPane.layoutXProperty().add((150 * (i % 4))));
+            orderButtons.get(i).layoutYProperty().bind(scrollPane.layoutYProperty().add(150 * (i / 4)));
         }
 
-        subtotal.layoutXProperty().bind(scene.widthProperty().subtract(subtotalBar.widthProperty()).add(10));
-        subtotal.layoutYProperty().bind(scene.heightProperty().subtract(subtotalBar.heightProperty()).add(30));
-        subtotal.setText("Subtotal \n" +
+        subtotal.layoutXProperty().bind(orderingScene.widthProperty().subtract(subtotalBar.widthProperty()).add(10));
+        subtotal.layoutYProperty().bind(orderingScene.heightProperty().subtract(subtotalBar.heightProperty()).add(30));
+        subtotal.setText("Subtotal \n================ \n" +
                 mapToString(orderMap));
 
-        checkout.layoutXProperty().bind(scene.widthProperty().subtract(checkout.widthProperty()));
-        checkout.layoutYProperty().bind(scene.heightProperty().subtract(checkout.heightProperty()));
+        checkout.layoutXProperty().bind(orderingScene.widthProperty().subtract(checkout.widthProperty()));
+        checkout.layoutYProperty().bind(orderingScene.heightProperty().subtract(checkout.heightProperty()));
 
-        bottomBar2.layoutYProperty().bind(scene.heightProperty().subtract(bottomBar2.heightProperty()));
-        bottomBar2.widthProperty().bind(scene.widthProperty());
+        background3.layoutXProperty().bind(checkoutScene.widthProperty().subtract(checkoutScene.widthProperty()));
+        background3.layoutYProperty().bind(checkoutScene.heightProperty().subtract(checkoutScene.heightProperty()));
+        background3.heightProperty().bind(checkoutScene.heightProperty());
+        background3.widthProperty().bind(checkoutScene.widthProperty());
 
-        backButton.layoutXProperty().bind(scene.xProperty());
-        backButton.layoutYProperty().bind(scene.heightProperty().subtract(backButton.heightProperty()));
+        decoration4.layoutXProperty().bind(checkoutScene.widthProperty().subtract(checkoutScene.widthProperty()));
+        decoration4.layoutYProperty().bind(checkoutScene.heightProperty().subtract(checkoutScene.heightProperty()));
+        decoration4.heightProperty().bind(checkoutScene.heightProperty());
 
-        finishOrder.layoutXProperty().bind(scene.widthProperty().subtract(checkout.widthProperty()));
-        finishOrder.layoutYProperty().bind(scene.heightProperty().subtract(checkout.heightProperty()));
+        bottomBar2.layoutYProperty().bind(checkoutScene.heightProperty().subtract(bottomBar2.heightProperty()));
+        bottomBar2.widthProperty().bind(checkoutScene.widthProperty());
 
-        checkoutTotal.layoutXProperty().bind(scene.xProperty());
-        checkoutTotal.layoutYProperty().bind(scene.yProperty());
+        backButton.layoutXProperty().bind(checkoutScene.widthProperty().subtract(checkoutScene.widthProperty()));
+        backButton.layoutYProperty().bind(checkoutScene.heightProperty().subtract(backButton.heightProperty()));
 
+        finishOrder.layoutXProperty().bind(checkoutScene.widthProperty().subtract(checkout.widthProperty()));
+        finishOrder.layoutYProperty().bind(checkoutScene.heightProperty().subtract(checkout.heightProperty()));
 
-        startOrder.setOnAction(e -> {stage.setScene(scene);
+        checkoutTotal.layoutXProperty().bind(checkoutScene.xProperty().add(50));
+        checkoutTotal.layoutYProperty().bind(checkoutScene.yProperty().add(50));
+
+        login.layoutXProperty().bind(loginScene.widthProperty().divide(2).subtract(login.widthProperty().divide(2)));
+        login.layoutYProperty().bind(loginScene.heightProperty().divide(2).subtract(login.heightProperty().divide(2)));
+
+        backToStart.layoutXProperty().bind(login.layoutXProperty());
+        backToStart.layoutYProperty().bind(login.layoutYProperty().subtract(100));
+
+        managerIdInputLabel.layoutXProperty().bind(login.layoutXProperty());
+        managerIdInputLabel.layoutYProperty().bind(login.layoutYProperty().add(100));
+
+        managerIdInput.layoutXProperty().bind(login.layoutXProperty());
+        managerIdInput.layoutYProperty().bind(login.layoutYProperty().add(120));
+
+        managerPinInputLabel.layoutXProperty().bind(managerIdInput.layoutXProperty());
+        managerPinInputLabel.layoutYProperty().bind(managerIdInput.layoutYProperty().add(100));
+
+        managerPinInput.layoutXProperty().bind(managerIdInput.layoutXProperty());
+        managerPinInput.layoutYProperty().bind(managerIdInput.layoutYProperty().add(120));
+
+        /* This is where the events for buttons are handled
+        *
+         */
+        startOrder.setOnAction(e -> {stage.setScene(orderingScene);
             orderNum = database.createNewOrder(Integer.parseInt(employeeIdInput.getText()));
             for(Integer key : orderMap.keySet()){
                 orderMap.put(key, 0);
             }
-            //orderIDList.clear();
-            subtotal.setText("Subtotal \n");});
+            subtotal.setText("Subtotal \n================ \n");});
+
+        goToLogin.setOnAction(e -> {stage.setScene(loginScene);});
 
         for(int i = 0; i < orderButtons.size(); i++){
             orderMap.put(i + 1, 0);
@@ -308,28 +442,36 @@ public class POSApplication extends Application {
             final int temp = i;
             orderButtons.get(temp).setOnMouseClicked(e -> {
                 if(e.getButton() == MouseButton.PRIMARY){
-                    //orderList.add(database.getItemName(temp+1));
                     orderMap.put(temp+1, orderMap.get(temp+1) + 1);
                     database.addToOrder(orderNum, temp+1);
-                    subtotal.setText("Subtotal \n" + mapToString(orderMap));
-                    //orderIDList.add(temp+1);
+                    subtotal.setText("Subtotal \n================ \n" + mapToString(orderMap));
                 }
                 if(e.getButton() == MouseButton.SECONDARY && orderMap.get(temp+1) > 0){
                     orderMap.put(temp+1, orderMap.get(temp+1) - 1);
                     database.removeFromOrder(orderNum, temp+1);
-                    subtotal.setText("Subtotal \n" + mapToString(orderMap));
-                    //orderIDList.add(temp+1);
+                    subtotal.setText("Subtotal \n================ \n" + mapToString(orderMap));
                 }
             });
         }
 
         checkout.setOnAction(e -> {stage.setScene(checkoutScene);
-            checkoutTotal.setText("Total: \n" + mapToStringCheckout(orderMap));});
+            checkoutTotal.setText("Final Order: \n================ \n" + mapToStringCheckout(orderMap) + "\nTotal - $" + database.getOrderSubtotal(orderNum));});
 
-        backButton.setOnAction(e -> stage.setScene(scene));
+        backButton.setOnAction(e -> stage.setScene(orderingScene));
         finishOrder.setOnAction(e -> {stage.setScene(firstScene);});
 
-        stage.setTitle("GUI");
+        backToStart.setOnAction(e -> {stage.setScene(firstScene);});
+
+        login.setOnAction(e -> {
+            if(database.checkManagerPIN(Integer.parseInt(managerIdInput.getText()), managerPinInput.getText()) == 1){
+
+            }
+        });
+
+        /* Run the GUI
+        *
+         */
+        stage.setTitle("Boba Tea POS v1.0.0");
         stage.setScene(firstScene);
         stage.show();
     }
