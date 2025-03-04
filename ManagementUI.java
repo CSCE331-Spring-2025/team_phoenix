@@ -36,7 +36,7 @@ public class ManagementUI extends Application {
         // Starting screen
         int firstSupplierID = getFirstSupplierID(); // Get the first supplier ID
         categoryContent = new VBox();
-        root.setCenter(createDeliverySection(firstSupplierID));
+        root.setCenter(createScrollableSection(createDeliverySection(firstSupplierID)));
         Scene mainScene = new Scene(root, 800, 600);
 
         // Button Actions
@@ -45,13 +45,25 @@ public class ManagementUI extends Application {
 
         // Change content on screen when clicking buttons
         ((Button) topMenu.getChildren().get(0))
-                .setOnAction(e -> root.setCenter(createDeliverySection(getFirstSupplierID())));
+                .setOnAction(e -> root.setCenter(createScrollableSection(createDeliverySection(getFirstSupplierID()))));
         ((Button) topMenu.getChildren().get(1))
-                .setOnAction(e -> root.setCenter(createCountInventorySection(getFirstSupplierID())));
-        ((Button) topMenu.getChildren().get(2)).setOnAction(e -> root.setCenter(createTrendsSection()));
-        ((Button) topMenu.getChildren().get(3)).setOnAction(e -> root.setCenter(createEmployeesSection()));
-        ((Button) topMenu.getChildren().get(4)).setOnAction(e -> root.setCenter(createMenuSection()));
+                .setOnAction(e -> root
+                        .setCenter(createScrollableSection(createCountInventorySection(getFirstSupplierID()))));
+        ((Button) topMenu.getChildren().get(2))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createTrendsSection())));
+        ((Button) topMenu.getChildren().get(3))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createEmployeesSection())));
+        ((Button) topMenu.getChildren().get(4))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createMenuSection())));
 
+    }
+
+    // Make screens able to scroll
+    private ScrollPane createScrollableSection(VBox content) {
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(content);
+        scrollPane.setFitToWidth(true);
+        return scrollPane;
     }
 
     private int getFirstSupplierID() {
@@ -344,14 +356,14 @@ public class ManagementUI extends Application {
 
         updateEmployeeButton.setOnAction(e -> {
             updateCurrentEmployee(Integer.parseInt(employeeIdField.getText()), updateFirstNameField.getText(),
-                    updateLastNameField.getText(), updateIsManagerCheckbox.isSelected());
+                    updateLastNameField.getText());
             updateEmployeeList(); // Refresh UI
         });
 
         layout.getChildren().addAll(new Label("Add Employee:"), firstNameField, lastNameField, addEmployeeButton,
                 new Label("Add Manager:"), mFirstNameField, mLastNameField, mPinField, addManagerButton,
                 new Label("Update an Existing Employee: "), employeeIdField,
-                updateFirstNameField, updateLastNameField, updateIsManagerCheckbox, updateManagerPinField,
+                updateFirstNameField, updateLastNameField,
                 updateEmployeeButton,
                 new Label("Employees:"), employeeList);
 
@@ -362,48 +374,46 @@ public class ManagementUI extends Application {
 
     // Adds a new employee to the database
     /*
-     * private void addEmployee(String firstName, String lastName, boolean
-     * isManager, String managerPin) {
+     * private void addEmployee(String firstName, String lastName) {
      * String insertQuery =
-     * "INSERT INTO employees (first_name, last_name, is_manager, manager_pin) VALUES (?, ?, ?, ?)"
-     * ;
-     * 
+     * "INSERT INTO employees (first_name, last_name) VALUES (?, ?)";
      * try (Connection conn = DatabaseConnection.connect();
      * PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-     * 
      * stmt.setString(1, firstName);
      * stmt.setString(2, lastName);
-     * stmt.setBoolean(3, isManager);
-     * stmt.setString(4, managerPin);
      * 
      * stmt.executeUpdate();
      * System.out.println("Added employee: " + firstName + " " + lastName);
-     * 
      * updateEmployeeList(); // Refresh UI
      * } catch (Exception e) {
      * e.printStackTrace();
      * }
      * }
      */
+    private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName) {
+        // String updateQuery = "UPDATE employees SET first_name = ?, last_name = ?,
+        // is_manager = ? WHERE id = ?";
 
-    private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName, boolean isManager) {
-        String updateQuery = "UPDATE employees SET first_name = ?, last_name = ?, is_manager = ? WHERE id = ?";
+        // try (Connection conn = DatabaseConnection.connect();
+        // PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
 
-        try (Connection conn = DatabaseConnection.connect();
-                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+        // stmt.setString(1, newFirstName);
+        // stmt.setString(2, newLastName);
+        // stmt.setBoolean(3, isManager);
+        // stmt.setInt(4, employeeId);
 
-            stmt.setString(1, newFirstName);
-            stmt.setString(2, newLastName);
-            stmt.setBoolean(3, isManager);
-            stmt.setInt(4, employeeId);
+        // stmt.executeUpdate();
 
-            stmt.executeUpdate();
-            System.out.println("Updated employee ID " + employeeId);
+        // System.out.println("Updated employee ID " + employeeId);
 
-            updateMenuList(); // Refresh UI
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // updateMenuList(); // Refresh UI
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
+        database.updateEmployeeFirstName(employeeId, newFirstName);
+        database.updateEmployeeLastName(employeeId, newLastName);
+        System.out.println("Updated employee ID " + employeeId);
+        updateMenuList();
     }
 
     // Updates the employee list in the UI (once a new employee is added, refreshes
@@ -476,7 +486,7 @@ public class ManagementUI extends Application {
         Button updateItemNameButton = new Button("Update Item Name");
 
         addItemButton.setOnAction(e -> {
-            addMenuItem(newItemNameField.getText(), Double.parseDouble(newItemPriceField.getText()));
+            database.addMenuItem(newItemNameField.getText(), Double.parseDouble(newItemPriceField.getText()));
             createMenuSection(); // Refresh UI
         });
 
@@ -485,9 +495,9 @@ public class ManagementUI extends Application {
             createMenuSection(); // Refresh UI
         });
 
-        // layout.getChildren().addAll(new Label("Add New Menu Item:"),
-        // newItemNameField, newItemPriceField,
-        // addItemButton);
+        layout.getChildren().addAll(new Label("Add New Menu Item:"),
+                newItemNameField, newItemPriceField,
+                addItemButton);
 
         layout.getChildren().addAll(new Label("Update an Existing Menu Item:"), itemIdField, updateItemNameField,
                 updateItemNameButton);
