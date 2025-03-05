@@ -707,7 +707,7 @@ public class Database {
                 String statement = "SELECT * FROM employees WHERE id = " + employee_id;
                 ResultSet result = select(statement);
                 if (result.next()) {
-                    String managerString = result.getString("is_manager");
+                    String managerString = result.getString("manager_pin");
                     status = (managerString.equals(pin)) ? 1 : 2;
                 }
             } catch (Exception e) {
