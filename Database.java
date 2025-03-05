@@ -1,19 +1,8 @@
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-/*
-        try {
-            String statement = "";
-            ResultSet result = select(statement);
-            if (result.next()) {
-                
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-*/
 
 /**
  * Creates a connection to the team_phoenix database.
@@ -123,9 +112,8 @@ public class Database {
      * @return {@code ResultSet} with the SQL query output.
      * @throws SQLException
      */
-    private ResultSet select(String statement) throws SQLException {
+    protected ResultSet select(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
-        // send statement to DBMS
         ResultSet result = stmt.executeQuery(statement);
         return result;
     }
@@ -137,25 +125,11 @@ public class Database {
      * @return {@code int} of the number of rows updated.
      * @throws SQLException
      */
-    private int update(String statement) throws SQLException {
+    protected int update(String statement) throws SQLException {
         Statement stmt = conn.createStatement();
-        // send statement to DBMS (throws SQLException)
         int result = stmt.executeUpdate(statement);
         return result;
     }
-
-    // int currentOrderNumber() {
-    // int order_num = -1;
-    // try {
-    // ResultSet result = select("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
-    // if (result != null && result.next()) {
-    // order_num = result.getInt("id");
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // return order_num;
-    // }
 
     /**
      * Pull an item's price from menu items table.
