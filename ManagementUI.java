@@ -3,7 +3,8 @@ package management;
 import management.DatabaseConnection;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -13,6 +14,8 @@ import javafx.stage.Stage;
 import management.Database;
 //import java.beans.VetoableChangeListenerProxy;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -319,27 +322,152 @@ public class ManagementUI extends Application {
     // night working on this UI please help me
     private VBox createReportsSection() {
         VBox layout = new VBox(10);
-        layout.getChildren().add(new Label("Set Time Frame: ")); // add db functionality later
-        layout.getChildren().add(new DatePicker());
+        layout.getChildren().add(new Label("Set Time Frame: "));
+        DatePicker startDatePicker = new DatePicker();
+        DatePicker endDatePicker = new DatePicker();
+        layout.getChildren().add(startDatePicker);
         layout.getChildren().add(new Label("to "));
-        layout.getChildren().add(new DatePicker());
-        layout.getChildren().add(new Label("Trends: ")); // unsure how to implement this as a horizontal thing instead
-                                                         // of vertical, for now wokrs ig but change by end of project
+        layout.getChildren().add(endDatePicker);
+        layout.getChildren().add(new Label("Trends: "));
 
-        // create the line graph, somehow implement db connectivity idk how yet
-        NumberAxis xAxis = new NumberAxis();
+        // create the bar graph
+        CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        LineChart<Number, Number> trendsGraph = new LineChart<>(xAxis, yAxis);
-        XYChart.Series<Number, Number> sampleSeries = new XYChart.Series<>();
-        sampleSeries.getData().add(new XYChart.Data<>(6, 9));
-        sampleSeries.getData().add(new XYChart.Data<>(4, 20));
-        sampleSeries.getData().add(new XYChart.Data<>(3, 60));
-        trendsGraph.getData().add(sampleSeries);
+        BarChart<String, Number> trendsGraph = new BarChart<>(xAxis, yAxis);
+        trendsGraph.setTitle("Most Popular Menu Items Over Time Period Selected");
 
-        layout.getChildren().addAll(trendsGraph, new Label("Key:"), new Label("Black Tea - Red"),
-                new Label("Oreo Milk Tea - Blue"), new Label("Matcha Milk Tea - Green")); // placeholders, change once
-                                                                                          // database is connected
+        layout.getChildren().addAll(trendsGraph, new Label("Key:"));
+
+        Button xReportButton = new Button("Generate X Report");
+        Button zReportButton = new Button("Generate Z Report");
+
+        TextArea reportArea = new TextArea();
+        reportArea.setEditable(false);
+        reportArea.setPrefHeight(200);
+
+        xReportButton
+                .setOnAction(e -> generateXReport(startDatePicker.getValue(), endDatePicker.getValue(), reportArea));
+        zReportButton
+                .setOnAction(e -> generateZReport(startDatePicker.getValue(), endDatePicker.getValue(), reportArea));
+
+        // Show data on graph over selected time frame
+        Button updateGraphButton = new Button("Update Graph");
+        updateGraphButton
+                .setOnAction(e -> updateGraph(startDatePicker.getValue(), endDatePicker.getValue(), trendsGraph));
+
+        layout.getChildren().addAll(updateGraphButton, xReportButton, zReportButton, reportArea);
+
         return layout;
+    }
+
+    private void updateGraph(LocalDate startDate, LocalDate endDate, BarChart<String, Number> trendsGraph) {
+        if (startDate == null || endDate == null) {
+            System.out.println("Please select both start and end dates.");
+            return;
+        }
+
+        String query = "SELECT menu_items.item_name, COUNT(items_in_order.menu_id) AS total_usage, orders.time_placed "
+                +
+                "FROM items_in_order " +
+                "JOIN menu_items ON items_in_order.menu_id = menu_items.id " +
+                "JOIN orders ON items_in_order.order_id = orders.id " +
+                "WHERE orders.time_placed BETWEEN ? AND ? " +
+                "GROUP BY menu_items.item_name, orders.time_placed " +
+                "ORDER BY total_usage DESC " +
+                "LIMIT 5";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(startDate.atStartOfDay()));
+            stmt.setTimestamp(2, Timestamp.valueOf(endDate.atTime(LocalTime.MAX)));
+            ResultSet rs = stmt.executeQuery();
+
+            trendsGraph.getData().clear();
+
+            Map<String, XYChart.Series<String, Number>> seriesMap = new HashMap<>();
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                LocalDate date = rs.getTimestamp("time_placed").toLocalDateTime().toLocalDate();
+                int totalUsage = rs.getInt("total_usage");
+
+                XYChart.Series<String, Number> series = seriesMap.get(itemName);
+                if (series == null) {
+                    series = new XYChart.Series<>();
+                    series.setName(itemName);
+                    seriesMap.put(itemName, series);
+                    trendsGraph.getData().add(series);
+                }
+
+                series.getData().add(new XYChart.Data<>(date.toString(), totalUsage));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // generate an x report using sql queries
+    private void generateXReport(LocalDate startDate, LocalDate endDate, TextArea reportArea) {
+        if (startDate == null || endDate == null) {
+            reportArea.setText("Please select both start and end dates.");
+            return;
+        }
+        String query = "SELECT SUM(total_cost) AS total_sales FROM orders WHERE time_placed BETWEEN ? AND ?";
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(startDate.atStartOfDay()));
+            stmt.setTimestamp(2, Timestamp.valueOf(endDate.atTime(LocalTime.MAX)));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                double totalSales = rs.getDouble("total_sales");
+                reportArea.setText("X Report - Total Sales: $" + totalSales
+                        + "\n\t - Percentage of Sales w/ Debit/Credit card: 100% \n\t - Percentage of Sales w/ Cash: 0%");
+            } else {
+                reportArea.setText("No sales found for the selected date range.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            reportArea.setText("Error generating X report: " + e.getMessage());
+        }
+    }
+
+    // generate a z report using sql queries
+    private void generateZReport(LocalDate startDate, LocalDate endDate, TextArea reportArea) {
+        if (startDate == null || endDate == null) {
+            reportArea.setText("Please select both start and end dates.");
+            return;
+        }
+        String query = "SELECT SUM(total_cost) AS total_sales FROM orders WHERE time_placed BETWEEN ? AND ?";
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(startDate.atStartOfDay()));
+            stmt.setTimestamp(2, Timestamp.valueOf(endDate.atTime(LocalTime.MAX)));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                double totalSales = rs.getDouble("total_sales");
+                reportArea.setText("Z Report - Total Sales: $" + totalSales
+                        + "\n\t - Percentage of Sales w/ Debit/Credit card: 100% \n\t - Percentage of Sales w/ Cash: 0%");
+
+                resetDailyTotals(conn);
+            } else {
+                reportArea.setText("No sales found for the selected date range.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            reportArea.setText("Error generating Z report: " + e.getMessage());
+        }
+    }
+
+    // reset the daily totals for the z report
+    private void resetDailyTotals(Connection conn) {
+        String resetQuery = "UPDATE orders SET total_cost = 0 WHERE time_placed < ?";
+        try (PreparedStatement stmt = conn.prepareStatement(resetQuery)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+            int rowsUpdated = stmt.executeUpdate();
+            System.out.println("Reset totals for " + rowsUpdated + " orders.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // create tab for employees, with sections for adding new employees and viewing
