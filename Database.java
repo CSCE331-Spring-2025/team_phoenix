@@ -641,7 +641,7 @@ public class Database {
         int id = -1;
         try {
             String statement = "INSERT INTO inventory (item_name, supplier_id) VALUES ('"
-                    + item_name + "', " + supplier_id + ")";
+                    + item_name + "', " + supplier_id + ") RETURNING id";
             ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt("id");
@@ -756,7 +756,7 @@ public class Database {
         int id = -1;
         try {
             String statement = "INSERT INTO employees (first_name, last_name) VALUES ('"
-                    + first_name + "', '" + last_name + "') RETURN id";
+                    + first_name + "', '" + last_name + "') RETURNING id";
             ResultSet result = select(statement);
             if (result.next()) {
                 id = result.getInt("id");

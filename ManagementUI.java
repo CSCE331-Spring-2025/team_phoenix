@@ -16,6 +16,8 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.security.auth.callback.LanguageCallback;
+
 public class ManagementUI extends Application {
     private VBox categoryContent;
     private VBox employeeList;
@@ -50,7 +52,7 @@ public class ManagementUI extends Application {
                 .setOnAction(e -> root
                         .setCenter(createScrollableSection(createCountInventorySection(getFirstSupplierID()))));
         ((Button) topMenu.getChildren().get(2))
-                .setOnAction(e -> root.setCenter(createScrollableSection(createTrendsSection())));
+                .setOnAction(e -> root.setCenter(createScrollableSection(createReportsSection())));
         ((Button) topMenu.getChildren().get(3))
                 .setOnAction(e -> root.setCenter(createScrollableSection(createEmployeesSection())));
         ((Button) topMenu.getChildren().get(4))
@@ -83,13 +85,22 @@ public class ManagementUI extends Application {
     // Function for making the navigation bar
     private HBox createTopMenu(Stage primaryStage) {
         HBox topMenu = new HBox(10);
+        topMenu.setStyle("-fx-background-color:rgb(84, 10, 10); -fx-padding: 10;");
+
         Button deliveryButton = new Button("Delivery");
         Button countInventoryButton = new Button("Count Inventory");
-        Button trendsButton = new Button("Trends");
+        Button reportsButton = new Button("Reports");
         Button employeesButton = new Button("Employees");
         Button menuButton = new Button("Menu");
 
-        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, trendsButton, employeesButton, menuButton);
+        String buttonStyle = "-fx-background-color: rgb(84, 10, 10); -fx-text-fill: rgb(255, 255, 255); -fx-font-size: 16px; -fx-padding: 10;";
+        deliveryButton.setStyle(buttonStyle);
+        countInventoryButton.setStyle(buttonStyle);
+        reportsButton.setStyle(buttonStyle);
+        employeesButton.setStyle(buttonStyle);
+        menuButton.setStyle(buttonStyle);
+
+        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, reportsButton, employeesButton, menuButton);
         return topMenu;
     }
 
@@ -187,13 +198,26 @@ public class ManagementUI extends Application {
         VBox layout = new VBox(10);
         VBox deliveryContent = new VBox(); // Fresh VBox for the supplier's inventory items
 
+        TextField itemNameField = new TextField();
+        itemNameField.setPromptText("Item Name");
+        TextField supplierIdField = new TextField();
+        supplierIdField.setPromptText("Supplier ID (eg, 1 - 5)");
+        Button addIngredient = new Button("Add New Ingredient");
+
+        addIngredient.setOnAction(e -> {
+            database.addInventoryItem(itemNameField.getText(), Integer.parseInt(supplierIdField.getText()));
+            updateSupplierContent(deliveryContent, supplierID); // Refresh UI
+        });
+
         HBox supplierMenu = createSupplierMenu(supplierId -> updateSupplierContent(deliveryContent, supplierId)); // Supplier
                                                                                                                   // dropdown
                                                                                                                   // menu
 
         updateSupplierContent(deliveryContent, supplierID); // Load items dynamically
 
-        layout.getChildren().addAll(supplierMenu, deliveryContent);
+        layout.getChildren().addAll(supplierMenu, deliveryContent, new Label("Add a new item:"), itemNameField,
+                supplierIdField, addIngredient);
+
         return layout;
     }
 
@@ -222,12 +246,23 @@ public class ManagementUI extends Application {
         VBox layout = new VBox(10);
         VBox inventoryContent = new VBox(); // Separate container for inventory display
 
+        TextField itemNameField = new TextField();
+        itemNameField.setPromptText("ID of item to be removed");
+        Button removeItem = new Button("Remove Item");
+
+        removeItem.setOnAction(e -> {
+            database.removeInventoryItem(Integer.parseInt(itemNameField.getText()));
+            updateSupplierContentForCount(inventoryContent, supplierID); // Refresh UI
+            System.out.println("Removed item with ID " + itemNameField.getText());
+        });
+
         HBox supplierMenu = createSupplierMenu(
                 supplierId -> updateSupplierContentForCount(inventoryContent, supplierId));
 
         updateSupplierContentForCount(inventoryContent, supplierID); // Load inventory for counting
 
-        layout.getChildren().addAll(supplierMenu, inventoryContent);
+        layout.getChildren().addAll(supplierMenu, inventoryContent, new Label("Remove an item:"), itemNameField,
+                removeItem);
         return layout;
     }
 
@@ -282,7 +317,7 @@ public class ManagementUI extends Application {
     // create the trends tab for the management UI, with a line graph showing the
     // trends of the different drinks, not complete yet, finish soon I spent all
     // night working on this UI please help me
-    private VBox createTrendsSection() {
+    private VBox createReportsSection() {
         VBox layout = new VBox(10);
         layout.getChildren().add(new Label("Set Time Frame: ")); // add db functionality later
         layout.getChildren().add(new DatePicker());
@@ -319,9 +354,6 @@ public class ManagementUI extends Application {
         firstNameField.setPromptText("First Name");
         TextField lastNameField = new TextField();
         lastNameField.setPromptText("Last Name");
-        // CheckBox isManagerCheckbox = new CheckBox("Is Manager?");
-        // TextField managerPinField = new TextField();
-        // managerPinField.setPromptText("Manager 4-digit PIN");
         Button addEmployeeButton = new Button("Add Employee");
 
         TextField mFirstNameField = new TextField();
@@ -372,44 +404,8 @@ public class ManagementUI extends Application {
         return layout;
     }
 
-    // Adds a new employee to the database
-    /*
-     * private void addEmployee(String firstName, String lastName) {
-     * String insertQuery =
-     * "INSERT INTO employees (first_name, last_name) VALUES (?, ?)";
-     * try (Connection conn = DatabaseConnection.connect();
-     * PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-     * stmt.setString(1, firstName);
-     * stmt.setString(2, lastName);
-     * 
-     * stmt.executeUpdate();
-     * System.out.println("Added employee: " + firstName + " " + lastName);
-     * updateEmployeeList(); // Refresh UI
-     * } catch (Exception e) {
-     * e.printStackTrace();
-     * }
-     * }
-     */
+    // Just combines some methods from Database.java to make it easier to call
     private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName) {
-        // String updateQuery = "UPDATE employees SET first_name = ?, last_name = ?,
-        // is_manager = ? WHERE id = ?";
-
-        // try (Connection conn = DatabaseConnection.connect();
-        // PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
-
-        // stmt.setString(1, newFirstName);
-        // stmt.setString(2, newLastName);
-        // stmt.setBoolean(3, isManager);
-        // stmt.setInt(4, employeeId);
-
-        // stmt.executeUpdate();
-
-        // System.out.println("Updated employee ID " + employeeId);
-
-        // updateMenuList(); // Refresh UI
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
         database.updateEmployeeFirstName(employeeId, newFirstName);
         database.updateEmployeeLastName(employeeId, newLastName);
         System.out.println("Updated employee ID " + employeeId);
