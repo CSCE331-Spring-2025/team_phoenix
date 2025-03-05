@@ -22,16 +22,36 @@ import java.beans.EventHandler;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
+
+// for management side of UI
+import cashier.DatabaseConnection;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * Creates the cashier section of the POS system.
  */
 public class POSApplication extends Application {
-    Map<Integer, Integer> orderMap = new HashMap<>(); // A map containing the current order in the form: <id of a product, amount of the product in the order>
+    Map<Integer, Integer> orderMap = new HashMap<>(); // A map containing the current order in the form: <id of a
+                                                      // product, amount of the product in the order>
     int orderNum; // The id of the current order
     Database database = new Database();
-    Map<Integer, String> buttonNameMap = database.getMenuItemNames(); // The map of every menu item in the form <id of a product, name of the product>
+    Map<Integer, String> buttonNameMap = database.getMenuItemNames(); // The map of every menu item in the form <id of a
+                                                                      // product, name of the product>
+
+    // managementUI stuff
+    private VBox categoryContent;
+    private VBox employeeList;
 
     /**
      * @author Dylan Nguyen
@@ -41,13 +61,16 @@ public class POSApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        /* This part is where all the components for the GUI are initialized.
-        *
+        /*
+         * This part is where all the components for the GUI are initialized.
+         *
          */
 
-        /* These are the components for the first screen
-        *
+        /*
+         * These are the components for the first screen
+         *
          */
+
         Rectangle background = new Rectangle();
         background.setWidth(1080);
         background.setHeight(720);
@@ -81,12 +104,14 @@ public class POSApplication extends Application {
         employeeIdInput.setPrefSize(300, 20);
         employeeIdInput.setFont(Font.font("verdana"));
 
-        Group firstRoot = new Group(background, decoration2, decoration3, decoration1, startOrder, goToLogin, idInputLabel, employeeIdInput);
+        Group firstRoot = new Group(background, decoration2, decoration3, decoration1, startOrder, goToLogin,
+                idInputLabel, employeeIdInput);
 
         Scene firstScene = new Scene(firstRoot, 1080, 720);
 
-        /* These are the components for the second screen
-        *
+        /*
+         * These are the components for the second screen
+         *
          */
         Rectangle background2 = new Rectangle();
         background2.setWidth(1080);
@@ -106,7 +131,7 @@ public class POSApplication extends Application {
         Group buttonPane = new Group();
 
         ArrayList<Button> orderButtons = new ArrayList<>();
-        for(Integer id : buttonNameMap.keySet()){
+        for (Integer id : buttonNameMap.keySet()) {
             orderButtons.add(createButton(id));
         }
 
@@ -236,7 +261,7 @@ public class POSApplication extends Application {
                 subtotal,
                 checkout);
 
-        for(int i = 0; i < orderButtons.size(); i++) {
+        for (int i = 0; i < orderButtons.size(); i++) {
             if (database.getItemName(i + 1) != "") {
                 buttonPane.getChildren().add(orderButtons.get(i));
             }
@@ -249,8 +274,9 @@ public class POSApplication extends Application {
 
         Scene orderingScene = new Scene(orderingRoot);
 
-        /* These are the components for the third page.
-        *
+        /*
+         * These are the components for the third page.
+         *
          */
         Rectangle background3 = new Rectangle();
         background3.setWidth(1080);
@@ -286,8 +312,9 @@ public class POSApplication extends Application {
                 checkoutTotal);
         Scene checkoutScene = new Scene(checkoutRoot, 1080, 720);
 
-        /* These are the components for the manager login page
-        *
+        /*
+         * These are the components for the manager login page
+         *
          */
         Button login = new Button();
         login.setText("Login");
@@ -322,13 +349,16 @@ public class POSApplication extends Application {
 
         Scene loginScene = new Scene(loginRoot, 1080, 720);
 
-        /* This part is where all the components get placed correctly.
-        * Order is similar to how the components were initialized.
-        *
-        *
-        * */
-        startOrder.layoutXProperty().bind(firstScene.widthProperty().divide(2).subtract(startOrder.widthProperty().divide(2)));
-        startOrder.layoutYProperty().bind(firstScene.heightProperty().divide(2).subtract(startOrder.heightProperty().divide(2)));
+        /*
+         * This part is where all the components get placed correctly.
+         * Order is similar to how the components were initialized.
+         *
+         *
+         */
+        startOrder.layoutXProperty()
+                .bind(firstScene.widthProperty().divide(2).subtract(startOrder.widthProperty().divide(2)));
+        startOrder.layoutYProperty()
+                .bind(firstScene.heightProperty().divide(2).subtract(startOrder.heightProperty().divide(2)));
 
         goToLogin.layoutXProperty().bind(startOrder.layoutXProperty());
         goToLogin.layoutYProperty().bind(startOrder.layoutYProperty().subtract(100));
@@ -370,7 +400,7 @@ public class POSApplication extends Application {
         scrollPane.layoutXProperty().bind(orderingScene.xProperty());
         scrollPane.layoutYProperty().bind(orderingScene.yProperty());
 
-        for(int i = 0; i < orderButtons.size(); i++){
+        for (int i = 0; i < orderButtons.size(); i++) {
             orderButtons.get(i).layoutXProperty().bind(scrollPane.layoutXProperty().add((150 * (i % 4))));
             orderButtons.get(i).layoutYProperty().bind(scrollPane.layoutYProperty().add(150 * (i / 4)));
         }
@@ -422,105 +452,728 @@ public class POSApplication extends Application {
         managerPinInput.layoutXProperty().bind(managerIdInput.layoutXProperty());
         managerPinInput.layoutYProperty().bind(managerIdInput.layoutYProperty().add(120));
 
-        /* This is where the events for buttons are handled
-        *
+        /*
+         * This is where the events for buttons are handled
+         *
          */
-        startOrder.setOnAction(e -> {stage.setScene(orderingScene);
+        startOrder.setOnAction(e -> {
+            stage.setScene(orderingScene);
             orderNum = database.createNewOrder(Integer.parseInt(employeeIdInput.getText()));
-            for(Integer key : orderMap.keySet()){
+            for (Integer key : orderMap.keySet()) {
                 orderMap.put(key, 0);
             }
-            subtotal.setText("Subtotal \n================ \n");});
+            subtotal.setText("Subtotal \n================ \n");
+        });
 
-        goToLogin.setOnAction(e -> {stage.setScene(loginScene);});
+        goToLogin.setOnAction(e -> {
+            stage.setScene(loginScene);
+        });
 
-        for(int i = 0; i < orderButtons.size(); i++){
+        for (int i = 0; i < orderButtons.size(); i++) {
             orderMap.put(i + 1, 0);
         }
 
-        for(int i = 0; i < orderButtons.size(); i++){
+        for (int i = 0; i < orderButtons.size(); i++) {
             final int temp = i;
             orderButtons.get(temp).setOnMouseClicked(e -> {
-                if(e.getButton() == MouseButton.PRIMARY){
-                    orderMap.put(temp+1, orderMap.get(temp+1) + 1);
-                    database.addToOrder(orderNum, temp+1);
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    orderMap.put(temp + 1, orderMap.get(temp + 1) + 1);
+                    database.addToOrder(orderNum, temp + 1);
                     subtotal.setText("Subtotal \n================ \n" + mapToString(orderMap));
                 }
-                if(e.getButton() == MouseButton.SECONDARY && orderMap.get(temp+1) > 0){
-                    orderMap.put(temp+1, orderMap.get(temp+1) - 1);
-                    database.removeFromOrder(orderNum, temp+1);
+                if (e.getButton() == MouseButton.SECONDARY && orderMap.get(temp + 1) > 0) {
+                    orderMap.put(temp + 1, orderMap.get(temp + 1) - 1);
+                    database.removeFromOrder(orderNum, temp + 1);
                     subtotal.setText("Subtotal \n================ \n" + mapToString(orderMap));
                 }
             });
         }
 
-        checkout.setOnAction(e -> {stage.setScene(checkoutScene);
-            checkoutTotal.setText("Final Order: \n================ \n" + mapToStringCheckout(orderMap) + "\nTotal - $" + database.getOrderSubtotal(orderNum));});
+        checkout.setOnAction(e -> {
+            stage.setScene(checkoutScene);
+            checkoutTotal.setText("Final Order: \n================ \n" + mapToStringCheckout(orderMap) + "\nTotal - $"
+                    + database.getOrderSubtotal(orderNum));
+        });
 
         backButton.setOnAction(e -> stage.setScene(orderingScene));
-        finishOrder.setOnAction(e -> {stage.setScene(firstScene);});
+        finishOrder.setOnAction(e -> {
+            stage.setScene(firstScene);
+        });
 
-        backToStart.setOnAction(e -> {stage.setScene(firstScene);});
+        backToStart.setOnAction(e -> {
+            stage.setScene(firstScene);
+        });
 
         login.setOnAction(e -> {
-            if(database.checkManagerPIN(Integer.parseInt(managerIdInput.getText()), managerPinInput.getText()) == 1){
-
+            if (database.checkManagerPIN(Integer.parseInt(managerIdInput.getText()), managerPinInput.getText()) == 1) {
+                stage.setScene(getManagementStartingScene(stage));
+                System.out.print(database.checkManagerPIN(Integer.parseInt(managerIdInput.getText()),
+                        managerPinInput.getText()));
             }
         });
 
-        /* Run the GUI
-        *
+        /*
+         * Run the GUI
+         *
          */
         stage.setTitle("Boba Tea POS v1.0.0");
         stage.setScene(firstScene);
         stage.show();
     }
 
-    /** Convert the map containing orders to the text in the subtotal area
+    /**
+     * Convert the map containing orders to the text in the subtotal area
      *
      * @author Dylan Nguyen
      * @param map
      * @return
      */
-    private String mapToString(Map<Integer, Integer> map){
+    private String mapToString(Map<Integer, Integer> map) {
         String temp = "";
-        for(int i = 0; i < map.size(); i++){
-            if(map.get(i + 1) > 0){
-                temp = temp + "$" + (database.getItemPrice(i + 1) * map.get(i + 1)) + " - " + database.getItemName(i + 1) + ": " + map.get(i + 1) + "\n";
+        for (int i = 0; i < map.size(); i++) {
+            if (map.get(i + 1) > 0) {
+                temp = temp + "$" + (database.getItemPrice(i + 1) * map.get(i + 1)) + " - "
+                        + database.getItemName(i + 1) + ": " + map.get(i + 1) + "\n";
             }
         }
         return temp;
     }
 
-    /** Convert the map containing orders to the text in the checkout area
+    /**
+     * Convert the map containing orders to the text in the checkout area
      *
      * @author Dylan Nguyen
      * @param map
      * @return
      */
-    private String mapToStringCheckout(Map<Integer, Integer> map){
+    private String mapToStringCheckout(Map<Integer, Integer> map) {
         String temp = "";
-        for(int i = 0; i < map.size(); i++){
-            if(map.get(i + 1) > 0){
-                temp = temp + "$" + (database.getItemPrice(i + 1) * map.get(i + 1)) + " - " + map.get(i + 1) + "x " + database.getItemName(i + 1) + "\n";
+        for (int i = 0; i < map.size(); i++) {
+            if (map.get(i + 1) > 0) {
+                temp = temp + "$" + (database.getItemPrice(i + 1) * map.get(i + 1)) + " - " + map.get(i + 1) + "x "
+                        + database.getItemName(i + 1) + "\n";
             }
         }
         return temp;
     }
 
-    /** Create all necessary buttons
+    /**
+     * Create all necessary buttons
      *
      * @author Dylan Nguyen
      * @param idNum
      * @return Button
      */
-    private Button createButton(int idNum){
+    private Button createButton(int idNum) {
         Button button = new Button();
         button.setText(database.getItemName(idNum));
         button.setPrefSize(150, 150);
         button.setContentDisplay(ContentDisplay.TOP);
 
         return button;
+    }
+
+    // management stuff starts here
+    /**
+     * @author Rene Almeida
+     * @param stage The stage to display the management UI
+     * @return The scene for the management UI
+     */
+    private Scene getManagementStartingScene(Stage stage) {
+        // ManagementUI components
+        HBox topMenu = createTopMenu(stage);
+
+        BorderPane root = new BorderPane();
+        root.setTop(topMenu);
+
+        int firstSupplierID = getFirstSupplierID();
+        categoryContent = new VBox();
+        root.setCenter(createScrollableSection(createDeliverySection(firstSupplierID)));
+        Scene mainScene = new Scene(root, 800, 600);
+
+        ((Button) topMenu.getChildren().get(0))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createDeliverySection(getFirstSupplierID()))));
+        ((Button) topMenu.getChildren().get(1))
+                .setOnAction(e -> root
+                        .setCenter(createScrollableSection(createCountInventorySection(getFirstSupplierID()))));
+        ((Button) topMenu.getChildren().get(2))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createReportsSection())));
+        ((Button) topMenu.getChildren().get(3))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createEmployeesSection())));
+        ((Button) topMenu.getChildren().get(4))
+                .setOnAction(e -> root.setCenter(createScrollableSection(createMenuSection())));
+
+        return mainScene;
+    }
+
+    private ScrollPane createScrollableSection(VBox content) {
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(content);
+        scrollPane.setFitToWidth(true);
+        return scrollPane;
+    }
+
+    private int getFirstSupplierID() {
+        String query = "SELECT id FROM suppliers LIMIT 1";
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    // creates the top nav bar for all the categroies (delivery, count inventory,
+    // reports, employees, menu)
+    private HBox createTopMenu(Stage primaryStage) {
+        HBox topMenu = new HBox(10);
+        topMenu.setStyle("-fx-background-color:rgb(202, 103, 53); -fx-padding: 10;"); // CSS styling for nav bar
+
+        Button deliveryButton = new Button("Delivery");
+        Button countInventoryButton = new Button("Count Inventory");
+        Button reportsButton = new Button("Reports");
+        Button employeesButton = new Button("Employees");
+        Button menuButton = new Button("Menu");
+
+        // CSS for buttons
+        String buttonStyle = "-fx-background-color: rgb(84, 10, 10); -fx-text-fill: rgb(255, 255, 255); -fx-font-size: 16px; -fx-padding: 10;";
+        deliveryButton.setStyle(buttonStyle);
+        countInventoryButton.setStyle(buttonStyle);
+        reportsButton.setStyle(buttonStyle);
+        employeesButton.setStyle(buttonStyle);
+        menuButton.setStyle(buttonStyle);
+
+        topMenu.getChildren().addAll(deliveryButton, countInventoryButton, reportsButton, employeesButton, menuButton);
+        return topMenu;
+    }
+
+    private void updateInventory(String itemName, String newQuantity) {
+        String updateQuery = "UPDATE inventory SET quantity = ? WHERE item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setInt(1, Integer.parseInt(newQuantity));
+            stmt.setString(2, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Updated " + itemName + " to " + newQuantity);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Map<String, Integer> supplierMap = new HashMap<>(); // Store supplier name -> ID mapping
+
+    // Create the supplier dropdown menu for the management UI
+    private HBox createSupplierMenu(java.util.function.Consumer<Integer> updateFunction) {
+        HBox supplierMenu = new HBox(10);
+        ComboBox<String> supplierDropdown = new ComboBox<>();
+
+        String query = "SELECT id, supplier_name FROM suppliers";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int supplierId = rs.getInt("id");
+                String supplierName = rs.getString("supplier_name");
+
+                supplierMap.put(supplierName, supplierId);
+                supplierDropdown.getItems().add(supplierName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        supplierDropdown.setOnAction(e -> {
+            String selectedSupplier = supplierDropdown.getValue();
+            if (selectedSupplier != null) {
+                int supplierId = supplierMap.get(selectedSupplier);
+                updateFunction.accept(supplierId); // Calls the correct UI update function
+            }
+        });
+
+        supplierMenu.getChildren().addAll(new Label("Select Supplier:"), supplierDropdown);
+        return supplierMenu;
+    }
+
+    // Update the inventory content for the delivery section
+    private void updateSupplierContent(VBox deliveryContent, int supplierId) {
+        deliveryContent.getChildren().clear();
+
+        String query = "SELECT item_name, quantity FROM inventory WHERE supplier_id = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, supplierId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                int quantity = rs.getInt("quantity");
+
+                Label quantityLabel = new Label("Current: " + quantity); // Show current stock
+                TextField quantityField = new TextField();
+                Button updateButton = new Button("Update");
+
+                updateButton.setOnAction(e -> {
+                    updateInventory(supplierId, itemName, quantityField.getText());
+                    updateSupplierContent(deliveryContent, supplierId); // Refresh the UI
+                });
+
+                HBox itemRow = new HBox(10, new Label(itemName), quantityLabel, quantityField, updateButton);
+                deliveryContent.getChildren().add(itemRow);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Create the Delivery Tab for the management UI
+    private VBox createDeliverySection(int supplierID) {
+        VBox layout = new VBox(10);
+        VBox deliveryContent = new VBox(); // Fresh VBox for the supplier's inventory items
+
+        TextField itemNameField = new TextField();
+        itemNameField.setPromptText("Item Name");
+        TextField supplierIdField = new TextField();
+        supplierIdField.setPromptText("Supplier ID (eg, 1 - 5)");
+        Button addIngredient = new Button("Add New Ingredient");
+
+        addIngredient.setOnAction(e -> {
+            database.addInventoryItem(itemNameField.getText(), Integer.parseInt(supplierIdField.getText()));
+            updateSupplierContent(deliveryContent, supplierID); // Refresh UI
+        });
+
+        HBox supplierMenu = createSupplierMenu(supplierId -> updateSupplierContent(deliveryContent, supplierId)); // Supplier
+                                                                                                                  // dropdown
+                                                                                                                  // menu
+
+        updateSupplierContent(deliveryContent, supplierID); // Load items dynamically
+
+        layout.getChildren().addAll(supplierMenu, deliveryContent, new Label("Add a new item:"), itemNameField,
+                supplierIdField, addIngredient);
+
+        return layout;
+    }
+
+    // Update the inventory quantity for the delivery section
+    private void updateInventory(int supplierId, String itemName, String inputQuantity) {
+        String updateQuery = "UPDATE inventory SET quantity = quantity + ? WHERE supplier_id = ? AND item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setInt(1, Integer.parseInt(inputQuantity));
+            stmt.setInt(2, supplierId);
+            stmt.setString(3, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Added " + inputQuantity + " to " + itemName);
+
+            updateSupplierContent(categoryContent, supplierId); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // create the count inventory section for the management UI
+    private VBox createCountInventorySection(int supplierID) {
+        VBox layout = new VBox(10);
+        VBox inventoryContent = new VBox(); // Separate container for inventory display
+
+        TextField itemNameField = new TextField();
+        itemNameField.setPromptText("ID of item to be removed");
+        Button removeItem = new Button("Remove Item");
+
+        removeItem.setOnAction(e -> {
+            database.removeInventoryItem(Integer.parseInt(itemNameField.getText()));
+            updateSupplierContentForCount(inventoryContent, supplierID); // Refresh UI
+            System.out.println("Removed item with ID " + itemNameField.getText());
+        });
+
+        HBox supplierMenu = createSupplierMenu(
+                supplierId -> updateSupplierContentForCount(inventoryContent, supplierId));
+
+        updateSupplierContentForCount(inventoryContent, supplierID); // Load inventory for counting
+
+        layout.getChildren().addAll(supplierMenu, inventoryContent, new Label("Remove an item:"), itemNameField,
+                removeItem);
+        return layout;
+    }
+
+    // Update the inventory quantity for the count inventory section
+    private void overrideInventory(int supplierId, String itemName, String newQuantity) {
+        String updateQuery = "UPDATE inventory SET quantity = ? WHERE supplier_id = ? AND item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setInt(1, Integer.parseInt(newQuantity));
+            stmt.setInt(2, supplierId);
+            stmt.setString(3, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Set " + itemName + " quantity to " + newQuantity);
+
+            updateSupplierContent(categoryContent, supplierId); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Update the inventory content for the count inventory section
+    private void updateSupplierContentForCount(VBox inventoryContent, int supplierId) {
+        inventoryContent.getChildren().clear();
+
+        String query = "SELECT item_name, quantity FROM inventory WHERE supplier_id = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, supplierId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                int quantity = rs.getInt("quantity");
+
+                TextField quantityField = new TextField();
+                Button updateButton = new Button("Update");
+
+                updateButton.setOnAction(e -> overrideInventory(supplierId, itemName, quantityField.getText()));
+
+                inventoryContent.getChildren().addAll(new Label(itemName), quantityField, updateButton);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // create the reports tab for the management UI, with a bar graph showing the
+    // usage of different inventory items, I spent all
+    // night working on this UI please help me
+    private VBox createReportsSection() {
+        VBox layout = new VBox(10);
+        layout.getChildren().add(new Label("Set Time Frame: "));
+        DatePicker startDatePicker = new DatePicker();
+        DatePicker endDatePicker = new DatePicker();
+        layout.getChildren().add(startDatePicker);
+        layout.getChildren().add(new Label("to "));
+        layout.getChildren().add(endDatePicker);
+        layout.getChildren().add(new Label("Trends: "));
+
+        // create the bar graph
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        BarChart<String, Number> trendsGraph = new BarChart<>(xAxis, yAxis);
+        trendsGraph.setTitle("Usage of Inventory over Time Period Selected");
+
+        layout.getChildren().addAll(trendsGraph, new Label("Key:"));
+
+        Button xReportButton = new Button("Generate X Report");
+        Button zReportButton = new Button("Generate Z Report");
+
+        TextArea reportArea = new TextArea();
+        reportArea.setEditable(false);
+        reportArea.setPrefHeight(200);
+
+        xReportButton
+                .setOnAction(e -> generateXReport(reportArea));
+        zReportButton
+                .setOnAction(e -> generateZReport(reportArea));
+
+        // Show data on graph over selected time frame
+        Button updateGraphButton = new Button("Update Graph");
+        updateGraphButton
+                .setOnAction(e -> updateGraph(startDatePicker.getValue(), endDatePicker.getValue(), trendsGraph));
+
+        layout.getChildren().addAll(updateGraphButton, xReportButton, zReportButton, reportArea);
+
+        return layout;
+    }
+
+    // display data on the graph for the inputted time frame
+    private void updateGraph(LocalDate startDate, LocalDate endDate, BarChart<String, Number> trendsGraph) {
+        if (startDate == null || endDate == null) {
+            System.out.println("Please select both start and end dates.");
+            return;
+        }
+
+        String query = "SELECT * FROM get_inventory_usage (?, ?)";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(startDate.atStartOfDay()));
+            stmt.setTimestamp(2, Timestamp.valueOf(endDate.atTime(LocalTime.MAX)));
+            ResultSet rs = stmt.executeQuery();
+
+            trendsGraph.getData().clear();
+
+            Map<String, XYChart.Series<String, Number>> seriesMap = new HashMap<>();
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                int totalUsed = rs.getInt("total_used");
+
+                XYChart.Series<String, Number> series = seriesMap.get(itemName);
+                if (series == null) {
+                    series = new XYChart.Series<>();
+                    series.setName(itemName);
+                    seriesMap.put(itemName, series);
+                    trendsGraph.getData().add(series);
+                }
+
+                series.getData().add(new XYChart.Data<>(itemName, totalUsed));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // generate an x report using methods from Database.java
+    private void generateXReport(TextArea reportArea) {
+        try {
+            Map<String, Double> salesPerHour = database.getSalesPerHour();
+            StringBuilder report = new StringBuilder("X Report - Sales Per Hour:\n");
+            report.append("Boba Tea Store\n");
+            for (Map.Entry<String, Double> entry : salesPerHour.entrySet()) {
+                report.append(entry.getKey()).append(": $").append(entry.getValue()).append("\n");
+            }
+            report.append("Percentage of Credit Card Sales: 100%\n");
+            report.append("Percentage of Cash Sales: 0%\n");
+            reportArea.setText(report.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            reportArea.setText("Error generating X report: " + e.getMessage());
+        }
+    }
+
+    // generate a z report using methods from Database.java
+    private void generateZReport(TextArea reportArea) {
+        try {
+            double totalSales = database.getTotalSales();
+            float totalTax = (float) (totalSales * 0.0825);
+            StringBuilder report = new StringBuilder("Z Report - Total Sales:\n");
+            report.append("Boba Tea Store\n");
+            report.append("123 Boba Street, Galveston TX\n");
+            report.append("POS-01\n");
+            report.append("Reg-07\n");
+            report.append("Total Sales: $").append(totalSales).append("\n");
+            report.append("Total Tax: $" + totalTax).append("\n");
+            report.append("Total Credit Card Sales: $").append(totalSales).append("\n");
+            report.append("Total Cash Sales: $0.00").append("\n");
+            reportArea.setText(report.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            reportArea.setText("Error generating Z report: " + e.getMessage());
+        }
+    }
+
+    // create tab for employees, with sections for adding new employees and viewing
+    // existing ones
+    private VBox createEmployeesSection() {
+        VBox layout = new VBox(10);
+        employeeList = new VBox(); // Initialize employee list container
+
+        layout.getChildren().add(new Label("Manage Employees"));
+
+        TextField firstNameField = new TextField();
+        firstNameField.setPromptText("First Name");
+        TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Last Name");
+        Button addEmployeeButton = new Button("Add Employee");
+
+        TextField mFirstNameField = new TextField();
+        mFirstNameField.setPromptText("First Name");
+        TextField mLastNameField = new TextField();
+        mLastNameField.setPromptText("Last Name");
+        TextField mPinField = new TextField();
+        mPinField.setPromptText("4-digit PIN");
+        Button addManagerButton = new Button("Add Manager");
+
+        TextField employeeIdField = new TextField();
+        employeeIdField.setPromptText("ID of employee that will be updated");
+        TextField updateFirstNameField = new TextField();
+        updateFirstNameField.setPromptText("Change First Name");
+        TextField updateLastNameField = new TextField();
+        updateLastNameField.setPromptText("Change Last Name");
+        CheckBox updateIsManagerCheckbox = new CheckBox("Change Manager Status");
+        TextField updateManagerPinField = new TextField();
+        updateManagerPinField.setPromptText("Change Manager 4-digit PIN");
+        Button updateEmployeeButton = new Button("Update Employee");
+
+        addEmployeeButton.setOnAction(e -> {
+            database.addEmployee(firstNameField.getText(), lastNameField.getText());
+            // isManagerCheckbox.isSelected(), managerPinField.getText());
+            updateEmployeeList(); // Refresh UI
+        });
+
+        addManagerButton.setOnAction(e -> {
+            database.addManager(mFirstNameField.getText(), mLastNameField.getText(), mPinField.getText());
+            updateEmployeeList(); // Refresh UI
+        });
+
+        updateEmployeeButton.setOnAction(e -> {
+            updateCurrentEmployee(Integer.parseInt(employeeIdField.getText()), updateFirstNameField.getText(),
+                    updateLastNameField.getText());
+            updateEmployeeList(); // Refresh UI
+        });
+
+        layout.getChildren().addAll(new Label("Add Employee:"), firstNameField, lastNameField, addEmployeeButton,
+                new Label("Add Manager:"), mFirstNameField, mLastNameField, mPinField, addManagerButton,
+                new Label("Update an Existing Employee: "), employeeIdField,
+                updateFirstNameField, updateLastNameField,
+                updateEmployeeButton,
+                new Label("Employees:"), employeeList);
+
+        updateEmployeeList(); // Load employees from database
+
+        return layout;
+    }
+
+    // Just combines some methods from Database.java to make it easier to call
+    private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName) {
+        database.updateEmployeeFirstName(employeeId, newFirstName);
+        database.updateEmployeeLastName(employeeId, newLastName);
+        System.out.println("Updated employee ID " + employeeId);
+        updateMenuList();
+    }
+
+    // Updates the employee list in the UI (once a new employee is added, refreshes
+    // it and shows the updated list)
+    private void updateEmployeeList() {
+        employeeList.getChildren().clear();
+
+        String query = "SELECT id, first_name, last_name, is_manager FROM employees";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("first_name") + " " + rs.getString("last_name");
+                boolean managerStatus = rs.getBoolean("is_manager");
+                Label label = new Label(name + (managerStatus ? " (Manager)" : ""));
+                employeeList.getChildren().add(label);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // creates the menu tab for the management UI, with places to add new menu items
+    // and update the prices of existing ones
+    private VBox createMenuSection() {
+        VBox layout = new VBox(10);
+        layout.getChildren().add(new Label("Menu Items"));
+
+        String query = "SELECT item_name, price FROM menu_items";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                double price = rs.getDouble("price");
+
+                Label label = new Label(itemName + " - $" + String.format("%.2f", price));
+                layout.getChildren().add(label);
+
+                TextField priceField = new TextField(String.format("%.2f", price));
+                Button updateButton = new Button("Update Price");
+
+                updateButton.setOnAction(e -> {
+                    updateMenuItemPrice(itemName, Double.parseDouble(priceField.getText()));
+                    createMenuSection(); // Refresh UI
+                });
+
+                HBox itemRow = new HBox(10, label, priceField, updateButton);
+                layout.getChildren().add(itemRow);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Add new menu item section
+        TextField newItemNameField = new TextField();
+        newItemNameField.setPromptText("Item Name");
+        TextField newItemPriceField = new TextField();
+        newItemPriceField.setPromptText("Price");
+        Button addItemButton = new Button("Add Menu Item");
+
+        TextField itemIdField = new TextField();
+        itemIdField.setPromptText("ID of item whose name will be updated");
+        TextField updateItemNameField = new TextField();
+        updateItemNameField.setPromptText("Change existing item's name");
+        Button updateItemNameButton = new Button("Update Item Name");
+
+        addItemButton.setOnAction(e -> {
+            database.addMenuItem(newItemNameField.getText(), Double.parseDouble(newItemPriceField.getText()));
+            createMenuSection(); // Refresh UI
+        });
+
+        updateItemNameButton.setOnAction(e -> {
+            database.updateItemName(Integer.parseInt(itemIdField.getText()), updateItemNameField.getText());
+            createMenuSection(); // Refresh UI
+        });
+
+        layout.getChildren().addAll(new Label("Add New Menu Item:"),
+                newItemNameField, newItemPriceField,
+                addItemButton);
+
+        layout.getChildren().addAll(new Label("Update an Existing Menu Item:"), itemIdField, updateItemNameField,
+                updateItemNameButton);
+        return layout;
+    }
+
+    // adds a new menu item to the database
+    private void addMenuItem(String itemName, double price) {
+        String insertQuery = "INSERT INTO menu_items (item_name, price) VALUES (?, ?)";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+
+            stmt.setString(1, itemName);
+            stmt.setDouble(2, price);
+
+            stmt.executeUpdate();
+            System.out.println("Added menu item: " + itemName);
+
+            updateMenuList(); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateMenuItemPrice(String itemName, double newPrice) {
+        String updateQuery = "UPDATE menu_items SET price = ? WHERE item_name = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setDouble(1, newPrice);
+            stmt.setString(2, itemName);
+
+            stmt.executeUpdate();
+            System.out.println("Updated " + itemName + " price to $" + newPrice);
+
+            updateMenuList(); // Refresh UI
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateMenuList() {
+        createMenuSection(); // Refresh UI
     }
 
     public static void main(String[] args) {
