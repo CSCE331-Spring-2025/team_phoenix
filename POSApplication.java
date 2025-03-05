@@ -22,9 +22,6 @@ import java.beans.EventHandler;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -510,6 +507,8 @@ public class POSApplication extends Application {
         login.setOnAction(e -> {
             if (database.checkManagerPIN(Integer.parseInt(managerIdInput.getText()), managerPinInput.getText()) == 1) {
                 stage.setScene(getManagementStartingScene(stage));
+                System.out.print(database.checkManagerPIN(Integer.parseInt(managerIdInput.getText()),
+                        managerPinInput.getText()));
             }
         });
 
@@ -625,7 +624,7 @@ public class POSApplication extends Application {
 
     private HBox createTopMenu(Stage primaryStage) {
         HBox topMenu = new HBox(10);
-        topMenu.setStyle("-fx-background-color:rgb(84, 10, 10); -fx-padding: 10;");
+        topMenu.setStyle("-fx-background-color:rgb(202, 103, 53); -fx-padding: 10;");
 
         Button deliveryButton = new Button("Delivery");
         Button countInventoryButton = new Button("Count Inventory");
@@ -869,7 +868,7 @@ public class POSApplication extends Application {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         BarChart<String, Number> trendsGraph = new BarChart<>(xAxis, yAxis);
-        trendsGraph.setTitle("Most Popular Menu Items Over Time Period Selected");
+        trendsGraph.setTitle("Usage of Inventory over Time Period Selected");
 
         layout.getChildren().addAll(trendsGraph, new Label("Key:"));
 
@@ -881,9 +880,9 @@ public class POSApplication extends Application {
         reportArea.setPrefHeight(200);
 
         xReportButton
-                .setOnAction(e -> generateXReport(startDatePicker.getValue(), endDatePicker.getValue(), reportArea));
+                .setOnAction(e -> generateXReport(reportArea));
         zReportButton
-                .setOnAction(e -> generateZReport(startDatePicker.getValue(), endDatePicker.getValue(), reportArea));
+                .setOnAction(e -> generateZReport(reportArea));
 
         // Show data on graph over selected time frame
         Button updateGraphButton = new Button("Update Graph");
@@ -901,15 +900,7 @@ public class POSApplication extends Application {
             return;
         }
 
-        String query = "SELECT menu_items.item_name, COUNT(items_in_order.menu_id) AS total_usage, orders.time_placed "
-                +
-                "FROM items_in_order " +
-                "JOIN menu_items ON items_in_order.menu_id = menu_items.id " +
-                "JOIN orders ON items_in_order.order_id = orders.id " +
-                "WHERE orders.time_placed BETWEEN ? AND ? " +
-                "GROUP BY menu_items.item_name, orders.time_placed " +
-                "ORDER BY total_usage DESC " +
-                "LIMIT 5";
+        String query = "SELECT * FROM get_inventory_usage (?, ?)";
 
         try (Connection conn = DatabaseConnection.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -923,8 +914,7 @@ public class POSApplication extends Application {
 
             while (rs.next()) {
                 String itemName = rs.getString("item_name");
-                LocalDate date = rs.getTimestamp("time_placed").toLocalDateTime().toLocalDate();
-                int totalUsage = rs.getInt("total_usage");
+                int totalUsed = rs.getInt("total_used");
 
                 XYChart.Series<String, Number> series = seriesMap.get(itemName);
                 if (series == null) {
@@ -934,7 +924,7 @@ public class POSApplication extends Application {
                     trendsGraph.getData().add(series);
                 }
 
-                series.getData().add(new XYChart.Data<>(date.toString(), totalUsage));
+                series.getData().add(new XYChart.Data<>(itemName, totalUsed));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -942,24 +932,17 @@ public class POSApplication extends Application {
     }
 
     // generate an x report using sql queries
-    private void generateXReport(LocalDate startDate, LocalDate endDate, TextArea reportArea) {
-        if (startDate == null || endDate == null) {
-            reportArea.setText("Please select both start and end dates.");
-            return;
-        }
-        String query = "SELECT SUM(total_cost) AS total_sales FROM orders WHERE time_placed BETWEEN ? AND ?";
-        try (Connection conn = DatabaseConnection.connect();
-                PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setTimestamp(1, Timestamp.valueOf(startDate.atStartOfDay()));
-            stmt.setTimestamp(2, Timestamp.valueOf(endDate.atTime(LocalTime.MAX)));
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                double totalSales = rs.getDouble("total_sales");
-                reportArea.setText("X Report - Total Sales: $" + totalSales
-                        + "\n\t - Percentage of Sales w/ Debit/Credit card: 100% \n\t - Percentage of Sales w/ Cash: 0%");
-            } else {
-                reportArea.setText("No sales found for the selected date range.");
+    private void generateXReport(TextArea reportArea) {
+        try {
+            Map<String, Double> salesPerHour = database.getSalesPerHour();
+            StringBuilder report = new StringBuilder("X Report - Sales Per Hour:\n");
+            report.append("Boba Tea Store\n");
+            for (Map.Entry<String, Double> entry : salesPerHour.entrySet()) {
+                report.append(entry.getKey()).append(": $").append(entry.getValue()).append("\n");
             }
+            report.append("Percentage of Credit Card Sales: 100%\n");
+            report.append("Percentage of Cash Sales: 0%\n");
+            reportArea.setText(report.toString());
         } catch (Exception e) {
             e.printStackTrace();
             reportArea.setText("Error generating X report: " + e.getMessage());
@@ -967,41 +950,23 @@ public class POSApplication extends Application {
     }
 
     // generate a z report using sql queries
-    private void generateZReport(LocalDate startDate, LocalDate endDate, TextArea reportArea) {
-        if (startDate == null || endDate == null) {
-            reportArea.setText("Please select both start and end dates.");
-            return;
-        }
-        String query = "SELECT SUM(total_cost) AS total_sales FROM orders WHERE time_placed BETWEEN ? AND ?";
-        try (Connection conn = DatabaseConnection.connect();
-                PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setTimestamp(1, Timestamp.valueOf(startDate.atStartOfDay()));
-            stmt.setTimestamp(2, Timestamp.valueOf(endDate.atTime(LocalTime.MAX)));
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                double totalSales = rs.getDouble("total_sales");
-                reportArea.setText("Z Report - Total Sales: $" + totalSales
-                        + "\n\t - Percentage of Sales w/ Debit/Credit card: 100% \n\t - Percentage of Sales w/ Cash: 0%");
-
-                resetDailyTotals(conn);
-            } else {
-                reportArea.setText("No sales found for the selected date range.");
-            }
+    private void generateZReport(TextArea reportArea) {
+        try {
+            double totalSales = database.getTotalSales();
+            float totalTax = (float) (totalSales * 0.0825);
+            StringBuilder report = new StringBuilder("Z Report - Total Sales:\n");
+            report.append("Boba Tea Store\n");
+            report.append("123 Boba Street, Galveston TX\n");
+            report.append("POS-01");
+            report.append("Reg-07");
+            report.append("Total Sales: $").append(totalSales).append("\n");
+            report.append("Total Tax: $" + totalTax).append("\n");
+            report.append("Total Credit Card Sales: $").append(totalSales).append("\n");
+            report.append("Total Cash Sales: $0.00").append("\n");
+            reportArea.setText(report.toString());
         } catch (Exception e) {
             e.printStackTrace();
             reportArea.setText("Error generating Z report: " + e.getMessage());
-        }
-    }
-
-    // reset the daily totals for the z report
-    private void resetDailyTotals(Connection conn) {
-        String resetQuery = "UPDATE orders SET total_cost = 0 WHERE time_placed < ?";
-        try (PreparedStatement stmt = conn.prepareStatement(resetQuery)) {
-            stmt.setTimestamp(1, Timestamp.valueOf(LocalDate.now().atStartOfDay()));
-            int rowsUpdated = stmt.executeUpdate();
-            System.out.println("Reset totals for " + rowsUpdated + " orders.");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

@@ -1,4 +1,4 @@
-package management;
+package cashier;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -735,7 +735,7 @@ public class Database {
                 String statement = "SELECT * FROM employees WHERE id = " + employee_id;
                 ResultSet result = select(statement);
                 if (result.next()) {
-                    String managerString = result.getString("is_manager");
+                    String managerString = result.getString("manager_pin");
                     status = (managerString.equals(pin)) ? 1 : 2;
                 }
             } catch (Exception e) {
@@ -874,6 +874,82 @@ public class Database {
             e.printStackTrace();
         }
         return success;
+    }
+
+    public Map<String, String> getMerchantInfo() {
+        Map<String, String> merchantInfo = new HashMap<>();
+        merchantInfo.put("Store Name", "Boba Tea Store");
+        merchantInfo.put("Store Address", "123 Boba Street, Galveston, TX");
+        merchantInfo.put("Terminal ID", "POS-01");
+        merchantInfo.put("Register ID", "Reg-07");
+        return merchantInfo;
+    }
+
+    public String getManagerName() {
+        // id = 1 is the manager, Nathan Lee
+        String query = "SELECT first_name, last_name FROM employees WHERE id = 1;";
+        String managerName = "Unknown Manager"; // default
+
+        try {
+            ResultSet rs = select(query);
+            if (rs.next()) {
+                managerName = rs.getString("first_name") + " " + rs.getString("last_name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return managerName;
+    }
+
+    // X-REPORT: Gives sales per hour for the currrent day of operation. Can be run
+    // anytime.
+    public Map<String, Double> getSalesPerHour() {
+        Map<String, Double> salesPerHour = new HashMap<>();
+        String query = """
+                    SELECT DATE_TRUNC('hour', time_placed) AS hour, SUM(total_cost) AS total_sales
+                    FROM orders
+                    WHERE time_placed >= CURRENT_DATE
+                    GROUP BY hour
+                    ORDER BY hour;
+                """;
+
+        try {
+            ResultSet rs = select(query);
+            while (rs.next()) {
+                salesPerHour.put(rs.getTimestamp("hour").toString(), rs.getDouble("total_sales"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return salesPerHour;
+    }
+
+    // Z-REPORT: Get total sales for the current day. Run once at end of day.
+    public double getTotalSales() {
+        String query = "SELECT SUM(total_cost) AS total_sales FROM orders WHERE time_placed >= CURRENT_DATE;";
+        return getSingleValue(query, "total_sales");
+    }
+
+    // Placeholder: Discounts, Voids, Service Charges not tracked
+    public Map<String, Double> getVoidsReturnsDiscards() {
+        return new HashMap<>();
+    }
+
+    // Helper method when getting a *single* numerical value from the database
+    // testing this to improve readability of methods
+    private double getSingleValue(String query, String columnName) {
+        double value = 0.0;
+        try {
+            ResultSet rs = select(query);
+            if (rs.next()) {
+                value = rs.getDouble(columnName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return value;
     }
 
 }
