@@ -41,6 +41,76 @@ import java.time.LocalTime;
 /**
  * Creates the cashier section of the POS system.
  */
+/**
+ * Creates the cashier and management GUI for the POS system.
+ * <p>
+ * Hosts methods to //add here Dylan//, order/count inventory quatities, display
+ * data from database about inventory quantities and sales numbers, and change
+ * Employee and Menu Item information.
+ * <p>
+ * 
+ * <p>
+ * ===========================
+ * TABLE OF CONTENTS
+ * ===========================
+ * <ol>
+ * 
+ * Add your stuff here Dylan
+ * 
+ * <li>
+ * ManagementUI Menu
+ * <ul>
+ * <li>{@link #getManagementStartingScene(Stage)}
+ * <li>{@link #createTopMenu(Stage)}
+ * <li>{@link #createScrollableSection(VBox)}
+ * </ul>
+ * 
+ * <li>
+ * Delivery Menu
+ * <ul>
+ * <li>{@link #updateInventory(String, String)}
+ * <li>{@link #createSupplierMenu(java.util.function.Consumer)}
+ * <li>{@link #updateSupplierContent(VBox, int)}
+ * <li>{@link #createDeliverySection(int)}
+ * </ul>
+ * 
+ * <li>
+ * Count Inventory Menu
+ * <ul>
+ * <li>{@link #createCountInventorySection(int)}
+ * <li>{@link #overrideInventory(int, String, String)}
+ * <li>{@link #updateSupplierContentForCount(VBox, int)}
+ * </ul>
+ * 
+ * <li>
+ * Reports Menu
+ * <ul>
+ * <li>{@link #createReportsSection()}
+ * <li>{@link #updateGraph(LocalDate, LocalDate, BarChart<String, Number>)}
+ * <li>{@link #generateXReport(TextArea)}
+ * <li>{@link #generateZReport(TextArea)}
+ * </ul>
+ * 
+ * <li>
+ * Employees Menu
+ * <ul>
+ * <li>{@link #createEmployeesSection()}
+ * <li>{@link #updateCurrentEmployee(int, String, String)}
+ * <li>{@link #updateEmployeeList()}
+ * </ul>
+ * 
+ * <li>
+ * Menu Menu
+ * <li>{@link #createMenuSection()}
+ * <li>{@link #addMenuItem(String itemName, double price)}
+ * <li>{@link #updateMenuItemPrice(String, double)}
+ * <li>{@link #updateMenuList()}
+ * </ul>
+ * 
+ * </ol>
+ * 
+ * @author Dylan Nguyen, Rene Almeida
+ */
 public class POSApplication extends Application {
     Map<Integer, Integer> orderMap = new HashMap<>(); // A map containing the current order in the form: <id of a
                                                       // product, amount of the product in the order>
@@ -606,6 +676,12 @@ public class POSApplication extends Application {
         return mainScene;
     }
 
+    /**
+     * Create the scroll pane for the management UI allowing for scrolling
+     * 
+     * @param content The content to be displayed in the scroll pane
+     * @return The scroll pane for the management UI
+     */
     private ScrollPane createScrollableSection(VBox content) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(content);
@@ -613,6 +689,12 @@ public class POSApplication extends Application {
         return scrollPane;
     }
 
+    /**
+     * Gets the first supplier ID from the database to display the first supplier's
+     * content on either the delivery or count inventory sections
+     * 
+     * @return The first supplier ID
+     */
     private int getFirstSupplierID() {
         String query = "SELECT id FROM suppliers LIMIT 1";
         try (Connection conn = DatabaseConnection.connect();
@@ -629,6 +711,12 @@ public class POSApplication extends Application {
 
     // creates the top nav bar for all the categroies (delivery, count inventory,
     // reports, employees, menu)
+    /**
+     * Creates the top navigation bar for the management UI
+     * 
+     * @param primaryStage The stage to display the management UI
+     * @return The top navigation bar for the management UI
+     */
     private HBox createTopMenu(Stage primaryStage) {
         HBox topMenu = new HBox(10);
         topMenu.setStyle("-fx-background-color:rgb(202, 103, 53); -fx-padding: 10;"); // CSS styling for nav bar
@@ -651,6 +739,12 @@ public class POSApplication extends Application {
         return topMenu;
     }
 
+    /**
+     * Updates the inventory quantity for the count inventory section
+     * 
+     * @param itemName    The name of the item to update
+     * @param newQuantity The new quantity to set for the item
+     */
     private void updateInventory(String itemName, String newQuantity) {
         String updateQuery = "UPDATE inventory SET quantity = ? WHERE item_name = ?";
 
@@ -670,6 +764,12 @@ public class POSApplication extends Application {
     private Map<String, Integer> supplierMap = new HashMap<>(); // Store supplier name -> ID mapping
 
     // Create the supplier dropdown menu for the management UI
+    /**
+     * Creates the supplier dropdown menu for the management UI
+     * 
+     * @param updateFunction The function to call when the supplier is changed
+     * @return HBox containing the supplier dropdown menu
+     */
     private HBox createSupplierMenu(java.util.function.Consumer<Integer> updateFunction) {
         HBox supplierMenu = new HBox(10);
         ComboBox<String> supplierDropdown = new ComboBox<>();
@@ -704,6 +804,12 @@ public class POSApplication extends Application {
     }
 
     // Update the inventory content for the delivery section
+    /**
+     * Loads inventory items from the suppliers to use for the delivery section
+     * 
+     * @param deliveryContent The VBox to display the inventory items
+     * @param supplierId      The supplier ID to load the inventory items from
+     */
     private void updateSupplierContent(VBox deliveryContent, int supplierId) {
         deliveryContent.getChildren().clear();
 
@@ -737,6 +843,12 @@ public class POSApplication extends Application {
     }
 
     // Create the Delivery Tab for the management UI
+    /**
+     * Creates the delivery section for the management UI
+     * 
+     * @param supplierID The supplier ID to display the delivery section for
+     * @return VBox containing the delivery section
+     */
     private VBox createDeliverySection(int supplierID) {
         VBox layout = new VBox(10);
         VBox deliveryContent = new VBox(); // Fresh VBox for the supplier's inventory items
@@ -765,6 +877,13 @@ public class POSApplication extends Application {
     }
 
     // Update the inventory quantity for the delivery section
+    /**
+     * Updates the inventory quantity for the delivery section
+     * 
+     * @param supplierId    The supplier ID to update the inventory for
+     * @param itemName      The name of the item to update
+     * @param inputQuantity The new quantity to set for the item
+     */
     private void updateInventory(int supplierId, String itemName, String inputQuantity) {
         String updateQuery = "UPDATE inventory SET quantity = quantity + ? WHERE supplier_id = ? AND item_name = ?";
 
@@ -785,6 +904,12 @@ public class POSApplication extends Application {
     }
 
     // create the count inventory section for the management UI
+    /**
+     * Creates the count inventory section for the management UI
+     * 
+     * @param supplierID The supplier ID to display the inventory for
+     * @return The count inventory section for the management UI
+     */
     private VBox createCountInventorySection(int supplierID) {
         VBox layout = new VBox(10);
         VBox inventoryContent = new VBox(); // Separate container for inventory display
@@ -810,6 +935,13 @@ public class POSApplication extends Application {
     }
 
     // Update the inventory quantity for the count inventory section
+    /**
+     * Updates the inventory quantity for the count inventory section
+     * 
+     * @param supplierId  The supplier ID to update the inventory for
+     * @param itemName    The name of the item to update
+     * @param newQuantity The new quantity to set for the item
+     */
     private void overrideInventory(int supplierId, String itemName, String newQuantity) {
         String updateQuery = "UPDATE inventory SET quantity = ? WHERE supplier_id = ? AND item_name = ?";
 
@@ -830,6 +962,12 @@ public class POSApplication extends Application {
     }
 
     // Update the inventory content for the count inventory section
+    /**
+     * Updates the inventory content for the count inventory section
+     * 
+     * @param inventoryContent The content to be displayed in the count inventory
+     * @param supplierId       The supplier ID to display the inventory for
+     */
     private void updateSupplierContentForCount(VBox inventoryContent, int supplierId) {
         inventoryContent.getChildren().clear();
 
@@ -860,6 +998,11 @@ public class POSApplication extends Application {
     // create the reports tab for the management UI, with a bar graph showing the
     // usage of different inventory items, I spent all
     // night working on this UI please help me
+    /**
+     * Creates the reports section for the management UI
+     * 
+     * @return The reports section for the management UI
+     */
     private VBox createReportsSection() {
         VBox layout = new VBox(10);
         layout.getChildren().add(new Label("Set Time Frame: "));
@@ -901,6 +1044,13 @@ public class POSApplication extends Application {
     }
 
     // display data on the graph for the inputted time frame
+    /**
+     * Updates the graph with the inventory usage data for the selected time frame
+     * 
+     * @param startDate   The start date for the time frame
+     * @param endDate     The end date for the time frame
+     * @param trendsGraph The graph to display the inventory usage data
+     */
     private void updateGraph(LocalDate startDate, LocalDate endDate, BarChart<String, Number> trendsGraph) {
         if (startDate == null || endDate == null) {
             System.out.println("Please select both start and end dates.");
@@ -939,6 +1089,11 @@ public class POSApplication extends Application {
     }
 
     // generate an x report using methods from Database.java
+    /**
+     * Generates an X report for the management UI
+     * 
+     * @param reportArea The text area to display the X report
+     */
     private void generateXReport(TextArea reportArea) {
         try {
             Map<String, Double> salesPerHour = database.getSalesPerHour();
@@ -957,6 +1112,11 @@ public class POSApplication extends Application {
     }
 
     // generate a z report using methods from Database.java
+    /**
+     * Generates a Z report for the management UI
+     * 
+     * @param reportArea The text area to display the Z report
+     */
     private void generateZReport(TextArea reportArea) {
         try {
             double totalSales = database.getTotalSales();
@@ -979,6 +1139,11 @@ public class POSApplication extends Application {
 
     // create tab for employees, with sections for adding new employees and viewing
     // existing ones
+    /**
+     * Creates the employees section for the management UI
+     * 
+     * @return The employees section
+     */
     private VBox createEmployeesSection() {
         VBox layout = new VBox(10);
         employeeList = new VBox(); // Initialize employee list container
@@ -1040,6 +1205,13 @@ public class POSApplication extends Application {
     }
 
     // Just combines some methods from Database.java to make it easier to call
+    /**
+     * Updates the first and last name of an employee
+     * 
+     * @param employeeId   The ID of the employee to update
+     * @param newFirstName The new first name
+     * @param newLastName  The new last name
+     */
     private void updateCurrentEmployee(int employeeId, String newFirstName, String newLastName) {
         database.updateEmployeeFirstName(employeeId, newFirstName);
         database.updateEmployeeLastName(employeeId, newLastName);
@@ -1049,6 +1221,9 @@ public class POSApplication extends Application {
 
     // Updates the employee list in the UI (once a new employee is added, refreshes
     // it and shows the updated list)
+    /**
+     * Updates the employee list in the management UI
+     */
     private void updateEmployeeList() {
         employeeList.getChildren().clear();
 
@@ -1072,6 +1247,11 @@ public class POSApplication extends Application {
 
     // creates the menu tab for the management UI, with places to add new menu items
     // and update the prices of existing ones
+    /**
+     * Creates the menu section for the management UI
+     * 
+     * @return The menu section
+     */
     private VBox createMenuSection() {
         VBox layout = new VBox(10);
         layout.getChildren().add(new Label("Menu Items"));
@@ -1136,6 +1316,12 @@ public class POSApplication extends Application {
     }
 
     // adds a new menu item to the database
+    /**
+     * Adds a new menu item to the database
+     * 
+     * @param itemName
+     * @param price
+     */
     private void addMenuItem(String itemName, double price) {
         String insertQuery = "INSERT INTO menu_items (item_name, price) VALUES (?, ?)";
 
@@ -1154,6 +1340,12 @@ public class POSApplication extends Application {
         }
     }
 
+    /**
+     * Updates the price of a menu item
+     * 
+     * @param itemName
+     * @param newPrice
+     */
     private void updateMenuItemPrice(String itemName, double newPrice) {
         String updateQuery = "UPDATE menu_items SET price = ? WHERE item_name = ?";
 
@@ -1172,6 +1364,9 @@ public class POSApplication extends Application {
         }
     }
 
+    /**
+     * Updates the menu list in the management UI
+     */
     private void updateMenuList() {
         createMenuSection(); // Refresh UI
     }
