@@ -876,6 +876,12 @@ public class Database {
         return success;
     }
 
+    /**
+     * Pull the information on the merchant.
+     * 
+     * @return A map of information to data consisting of store name, store address,
+     *         terminal ID, and register ID.
+     */
     public Map<String, String> getMerchantInfo() {
         Map<String, String> merchantInfo = new HashMap<>();
         merchantInfo.put("Store Name", "Boba Tea Store");
@@ -885,6 +891,11 @@ public class Database {
         return merchantInfo;
     }
 
+    /**
+     * Pull the store manager's name from the employees table.
+     * 
+     * @return The name of the store manager.
+     */
     public String getManagerName() {
         // id = 1 is the manager, Nathan Lee
         String query = "SELECT first_name, last_name FROM employees WHERE id = 1;";
@@ -902,8 +913,12 @@ public class Database {
         return managerName;
     }
 
-    // X-REPORT: Gives sales per hour for the currrent day of operation. Can be run
-    // anytime.
+    /**
+     * X-REPORT: Gives sales per hour for the currrent day of operation. Can be run
+     * anytime.
+     * 
+     * @return A {@code Map} of the time to the total sales in that hour.
+     */
     public Map<String, Double> getSalesPerHour() {
         Map<String, Double> salesPerHour = new HashMap<>();
         String query = """
@@ -926,19 +941,33 @@ public class Database {
         return salesPerHour;
     }
 
-    // Z-REPORT: Get total sales for the current day. Run once at end of day.
+    /**
+     * Z-REPORT: Get total sales for the current day. Run once at end of day.
+     * 
+     * @return The total sales from the current day.
+     */
     public double getTotalSales() {
         String query = "SELECT SUM(total_cost) AS total_sales FROM orders WHERE time_placed >= CURRENT_DATE;";
         return getSingleValue(query, "total_sales");
     }
 
-    // Placeholder: Discounts, Voids, Service Charges not tracked
+    /**
+     * Placeholder: Discounts, Voids, Service Charges not tracked
+     * 
+     * @return
+     */
     public Map<String, Double> getVoidsReturnsDiscards() {
         return new HashMap<>();
     }
 
-    // Helper method when getting a *single* numerical value from the database
-    // testing this to improve readability of methods
+    /**
+     * Helper method when getting a *single* numerical value from the database
+     * testing this to improve readability of methods.
+     * 
+     * @param query
+     * @param columnName
+     * @return
+     */
     private double getSingleValue(String query, String columnName) {
         double value = 0.0;
         try {
